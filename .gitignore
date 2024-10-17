@@ -1,0 +1,30 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# IDE specific
+.vscode/
+.idea/
+.ruff_cache
+
+# Logs and temporary files
+*.log
+*.swp
+*.tmp
+dist
+
+# Dependency directories
+lib/
+lib64/
+
+# Secrets
+.env
+*.creds
