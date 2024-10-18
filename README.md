@@ -1,4 +1,7 @@
 # Whispr (Pronounced as Whisp-R)
+
+![Logo](./logo.png)
+
 A multi-vault secret injection tool for safe injection of secrets into developer environment.
 
 # Background
