@@ -15,6 +15,11 @@ Key Features of Whispr:
 * **No Custom Scripts Required**: Whispr eliminates the need for custom bash scripts or cloud CLI tools to manage secrets, making it easy to get started.
 * **Easy Installation**: Simply install Whispr from PyPi and start securing secrets.
 
+Supported Vault Technologies
+
+![Supported-vaults](./whispr-supported.png)
+
+
 # Why use Whispr ?
 
 The MITRE ATT&CK Framework Tactic 8 (Credential Access) suggests that adversaries can exploit plain-text secrets and sensitive information stored in files like `.env`. It is essential to avoid storing
