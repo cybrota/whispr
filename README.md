@@ -2,8 +2,9 @@
 
 ![Logo](./logo.png)
 
-Whispr (Pronounced as Whisp-r) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your project's shell environment. This is very useful for enabling secure local software development.
-Whispr takes keys (with empty values) specified in `.env` file and fetches respective secrets from project's vault, and sets them as environment variables.
+Whispr (Pronounced as Whisp-r) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
+
+Whispr takes keys (with empty values) specified in `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
 Key Features of Whispr:
 
@@ -11,8 +12,8 @@ Key Features of Whispr:
 * **Just In Time (JIT) Privilege**: Set environment variables for developers only when they're needed.
 * **Secure Development**: Eliminate plain-text secret storage and ensure a secure development process.
 * **Customizable Configurations**: Configure project-level settings to manage multiple secrets for multiple projects.
-* **No Custom Scripts Required**: Whispr eliminates the need for custom scripts to manage secrets, making it easy to get started.
-* **Easy Installation**: Simply install and enjoy the benefits of using Whispr.
+* **No Custom Scripts Required**: Whispr eliminates the need for custom bash scripts or cloud CLI tools to manage secrets, making it easy to get started.
+* **Easy Installation**: Simply install Whispr from PyPi and start securing secrets.
 
 # Why use Whispr ?
 
@@ -39,16 +40,16 @@ Run `whispr init` in your terminal to create a `whispr.yaml` file in your projec
 
 **Example whispr.yaml contents:**
 ```yaml
+env_file: '.env'
 secret_name: <your_secret>
 vault: aws
-env_file: .env
 ```
 
 ## Setting Up Your Secrets
 
 **Step 2: Create or Configure a Secret File**
 
-Create a `*.env` file (or use the `env_file` key in your `whispr.yaml` file) with empty values for your secret keys. For example:
+Create a `.env` file (or use the `env_file` key in your `whispr.yaml` file) with empty values for your secret keys. For example:
 
 ```bash
 POSTGRES_USERNAME=
@@ -60,15 +61,21 @@ POSTGRES_PASSWORD=
 *   Authenticate to AWS via `aws sso login`.
 *   Alternatively, set temporary AWS credentials using a config file or environment variables.
 
-## Activating Whispr
+## Launching commands using Whispr
 
-Run the command: `whispr set` to inject your secrets into the current shell environment. Your application is now ready to launch!
+Now, you can run any app using: `whispr run '<your_app_command_with_args>'` (mind the single quotes around command) to inject your secrets before starting the subprocess.
+
+Examples:
+```bash
+whispr run 'python main.py' # Inject secrets and run a Python program
+whispr run 'node server.js --threads 4' # Inject secrets and run a Node.js express server
+whispr run 'django manage.py runserver' # Inject secrets and start a Django server
+whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. Script should be permitted to execute
+whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory
+```
 
 # TODO
 
 * Add tests
-* Support localstack
-* Support Azure Key Vault
 * Support HashiCorp Vault
-* Support GCP Secret Manager
 * Support 1Password
