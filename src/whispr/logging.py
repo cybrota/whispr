@@ -1,6 +1,9 @@
-import structlog
+"""Logger configuration"""
+
 import logging
 import sys
+
+import structlog
 
 
 # Configure structlog with human-readable output

@@ -38,7 +38,9 @@ class AWSVault(SimpleVault):
                 )
                 return ""
             elif error.response["Error"]["Code"] == "UnrecognizedClientException":
-                self.logger.error("Incorrect AWS credentials set for operation. Please verify them and retry.")
+                self.logger.error(
+                    "Incorrect AWS credentials set for operation. Please verify them and retry."
+                )
                 return ""
             else:
                 raise

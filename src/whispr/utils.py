@@ -1,14 +1,15 @@
 """Functions used by CLI"""
 
-import os
-import subprocess
-import shlex
 import json
-import yaml
+import os
+import shlex
+import subprocess
 
+import yaml
 from dotenv import dotenv_values
-from whispr.logging import logger
+
 from whispr.factory import VaultFactory
+from whispr.logging import logger
 
 
 def execute_command(command: tuple):
@@ -16,7 +17,10 @@ def execute_command(command: tuple):
     try:
         subprocess.run(shlex.split(command[0]), env=os.environ, shell=False, check=True)
     except subprocess.CalledProcessError:
-        logger.error(f"Encountered a problem while running command: '{command[0]}'. Aborting.")
+        logger.error(
+            f"Encountered a problem while running command: '{command[0]}'. Aborting."
+        )
+
 
 def fetch_secrets(config) -> dict:
     """Fetch secret from relevant vault"""
@@ -24,7 +28,9 @@ def fetch_secrets(config) -> dict:
     vault = config.get("vault")
     secret_name = config.get("secret_name")
     if not vault or not secret_name:
-        logger.error("Vault type or secret name not specified in the configuration file.")
+        logger.error(
+            "Vault type or secret name not specified in the configuration file."
+        )
         return {}
 
     vault_instance = VaultFactory.get_vault(vault_type=vault, logger=logger)
@@ -34,13 +40,12 @@ def fetch_secrets(config) -> dict:
 
     return json.loads(secret_string)
 
+
 def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
-    """ Inject vault secret values into local empty secrets"""
+    """Inject vault secret values into local empty secrets"""
 
     filled_secrets = {}
-    env_vars = dotenv_values(
-        dotenv_path=env_file
-    )
+    env_vars = dotenv_values(dotenv_path=env_file)
 
     # Iterate over .env variables and check if they exist in the fetched secrets
     for key in env_vars:
@@ -48,10 +53,13 @@ def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
             filled_secrets[key] = vault_secrets[key]  # Collect the matching secrets
             os.environ[key] = vault_secrets[key]  # Update the current environment
         else:
-            logger.warning(f"The given key: '{key}' is not found in vault. So ignoring it.")
+            logger.warning(
+                f"The given key: '{key}' is not found in vault. So ignoring it."
+            )
 
     # Return the dictionary of matched secrets for further use if needed
     return filled_secrets
+
 
 def load_config(config_file: str) -> dict:
     """Loads a given config file"""

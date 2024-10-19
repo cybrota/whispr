@@ -1,14 +1,15 @@
+"""Vault factory"""
+
 import boto3
 import structlog
-
-from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 from google.cloud import secretmanager
 
-from whispr.vault import SimpleVault
 from whispr.aws import AWSVault
 from whispr.azure import AzureKeyVault
 from whispr.gcp import GCPVault
+from whispr.vault import SimpleVault
 
 
 class VaultFactory:
@@ -26,7 +27,7 @@ class VaultFactory:
         """
         if vault_type == "aws":
             client = boto3.client("secretsmanager")
-            logger.info("Initializing vault", vault_type=vault_type)
+            logger.info(f"Initializing {vault_type} vault")
             return AWSVault(logger, client)
 
         elif vault_type == "azure":
@@ -37,13 +38,15 @@ class VaultFactory:
                     f"Vault type: {vault_type} needs 'vault_url' set in whispr configuration."
                 )
 
-            client = SecretClient(vault_url=vault_url, credential=DefaultAzureCredential())
-            logger.info("Initializing vault", vault_type=vault_type)
+            client = SecretClient(
+                vault_url=vault_url, credential=DefaultAzureCredential()
+            )
+            logger.info(f"Initializing {vault_type} vault")
             return AzureKeyVault(logger, client)
 
         elif vault_type == "gcp":
             client = kwargs.get("client", secretmanager.SecretManagerServiceClient())
-            logger.info("Initializing vault", vault_type=vault_type)
+            logger.info(f"Initializing {vault_type} vault")
             return GCPVault(logger, client)
 
         else:

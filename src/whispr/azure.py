@@ -2,8 +2,8 @@
 
 import json
 
-from azure.keyvault.secrets import SecretClient
 import structlog
+from azure.keyvault.secrets import SecretClient
 
 from whispr.vault import SimpleVault
 
