@@ -4,7 +4,7 @@
 
 Whispr (Pronounced as Whisp-r) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
 
-Whispr takes keys (with empty values) specified in `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
+Whispr uses keys (with empty values) specified in a `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
 Key Features of Whispr:
 
@@ -13,9 +13,9 @@ Key Features of Whispr:
 * **Secure Development**: Eliminate plain-text secret storage and ensure a secure development process.
 * **Customizable Configurations**: Configure project-level settings to manage multiple secrets for multiple projects.
 * **No Custom Scripts Required**: Whispr eliminates the need for custom bash scripts or cloud CLI tools to manage secrets, making it easy to get started.
-* **Easy Installation**: Simply install Whispr from PyPi and start securing secrets.
+* **Easy Installation**: Simply install Whispr from PyPi and start securing app secrets.
 
-Supported Vault Technologies
+Supported Vault Technologies:
 
 ![Supported-vaults](./whispr-supported.png)
 
@@ -43,7 +43,7 @@ pip install whispr
 
 Run `whispr init` in your terminal to create a `whispr.yaml` file in your project root. This file will store your configuration settings.
 
-**Example whispr.yaml contents:**
+**Example whispr.yaml contents (For: AWS):**
 ```yaml
 env_file: '.env'
 secret_name: <your_secret>
@@ -54,17 +54,21 @@ vault: aws
 
 **Step 2: Create or Configure a Secret File**
 
-Create a `.env` file (or use the `env_file` key in your `whispr.yaml` file) with empty values for your secret keys. For example:
+Create a new `.env` file with empty values for your secret keys. For example:
 
 ```bash
 POSTGRES_USERNAME=
 POSTGRES_PASSWORD=
 ```
 
-**Authenticating to Your Vault**
+**Note**: You can also control filename with `env_file` key in your `whispr.yaml`.
+
+**Authenticating to Your Vault (Ex:AWS)**
 
 *   Authenticate to AWS via `aws sso login`.
 *   Alternatively, set temporary AWS credentials using a config file or environment variables.
+  
+**Note**: Use respective authentication methods for other vaults.
 
 ## Launching commands using Whispr
 
