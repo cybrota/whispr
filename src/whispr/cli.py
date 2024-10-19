@@ -14,7 +14,6 @@ CONFIG_FILE = 'whispr.yaml'
 
 def _get_matched_secrets(env_file: str, vault_secrets: dict) -> dict:
     env_vars = dotenv_values(dotenv_path=env_file)  # This returns a dict of key-value pairs from .env
-    print(env_file, env_vars)
     # Dictionary to collect variables from AWS secrets that match .env variables
     matched_secrets = {}
 
@@ -92,20 +91,21 @@ def run(command):
         logger.error(f"Unsupported vault type: {vault}")
         return
 
+    if not secret_value:
+        return
+
     secret_value = json.loads(secret_value)
+    matched_env = _get_matched_secrets(env_file, secret_value)
+    os.environ.update(matched_env)
+    logger.info("Secrets have been successfully injected into the environment")
 
-    if secret_value:
-        matched_env = _get_matched_secrets(env_file, secret_value)
-        os.environ.update(matched_env)
-        logger.info("Secrets have been successfully injected into the environment")
-
-        try:
-            # Remove capture_output=True to allow for interactive breakpoints
-            subprocess.run(command, env=os.environ, shell=True, check=True)
-        except FileNotFoundError:
-            logger.error(f"Command not found: {command[0]}")
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
+    try:
+        # Remove capture_output=True to allow for interactive breakpoints
+        subprocess.run(command, env=os.environ, shell=True, check=True)
+    except FileNotFoundError:
+        logger.error(f"Command not found: {command[0]}")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
 
 cli.add_command(init)
 cli.add_command(run)
