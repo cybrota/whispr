@@ -13,13 +13,13 @@ export AWS_SECRET_ACCESS_KEY=<temp_secret>
 export AWS_DEFAULT_REGION=<region>
 ```
 
-Step 2: Initialize a whispr configuration file for GCP.
+Step 2: Initialize a whispr configuration file for AWS.
 
 ```bash
 whispr init aws
 ```
 
-Step 3: Define a `.env` file with secrets stored in GCP
+Step 3: Define a `.env` file with secrets stored in AWS
 ```bash
 DB_USERNAME=
 DB_PASSWORD=
