@@ -2,6 +2,7 @@ import structlog
 import logging
 import sys
 
+
 # Configure structlog with human-readable output
 def setup_structlog() -> structlog.BoundLogger:
     """Initializes a structured logger"""
@@ -12,12 +13,14 @@ def setup_structlog() -> structlog.BoundLogger:
             structlog.processors.TimeStamper(fmt="iso"),  # Add timestamp in ISO format
             structlog.processors.StackInfoRenderer(),  # Include stack information if available
             structlog.processors.format_exc_info,  # Format exception info if an exception is logged
-            structlog.dev.ConsoleRenderer()  # Human-readable logs for development
+            structlog.dev.ConsoleRenderer(),  # Human-readable logs for development
         ],
         context_class=dict,  # Use dictionary to store log context
         logger_factory=structlog.stdlib.LoggerFactory(),  # Use stdlib logger factory
-        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),  # Set log level
-        cache_logger_on_first_use=True  # Cache loggers for better performance
+        wrapper_class=structlog.make_filtering_bound_logger(
+            logging.INFO
+        ),  # Set log level
+        cache_logger_on_first_use=True,  # Cache loggers for better performance
     )
 
     # Set up basic configuration for the standard library logging
@@ -25,6 +28,7 @@ def setup_structlog() -> structlog.BoundLogger:
 
     # Return the structlog logger instance
     return structlog.get_logger()
+
 
 # Initialize logger
 logger = setup_structlog()

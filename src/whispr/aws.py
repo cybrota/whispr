@@ -1,12 +1,16 @@
-import logging
+"""AWS Secrets Manager"""
 
 import boto3
-import botocore
 import botocore.exceptions
+import structlog
+
 from whispr.vault import SimpleVault
 
+
 class AWSVault(SimpleVault):
-    def __init__(self, logger: logging.Logger, client: boto3.client):
+    """A Vault that maps secrets in AWS secrets manager"""
+
+    def __init__(self, logger: structlog.BoundLogger, client: boto3.client):
         """
         Initialize the AWS Vault
 
@@ -27,14 +31,17 @@ class AWSVault(SimpleVault):
             self.logger.info(f"Successfully fetched secret: {secret_name}")
             return response.get("SecretString")
         except botocore.exceptions.ClientError as error:
-            if error.response['Error']['Code'] == 'ResourceNotFoundException':
-                self.logger.error(f"The given secret: {secret_name} is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?")
+            if error.response["Error"]["Code"] == "ResourceNotFoundException":
+                self.logger.error(
+                    "The secret is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?",
+                    secret_name=secret_name,
+                )
                 return ""
-            elif error.response['Error']['Code'] == 'UnrecognizedClientException':
-                self.logger.error("Incorrect AWS credentials set for operation")
+            elif error.response["Error"]["Code"] == "UnrecognizedClientException":
+                self.logger.error("Incorrect AWS credentials set for operation. Please verify them and retry.")
                 return ""
             else:
                 raise
         except Exception as e:
-            self.logger.error(f"Error fetching secret: {secret_name}, Error: {e}")
+            self.logger.error("Error fetching secret", error=e)
             raise

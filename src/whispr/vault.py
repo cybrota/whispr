@@ -1,10 +1,15 @@
+"""Abstract Class for Vault. A Vault is a secret store."""
+
 from abc import ABC, abstractmethod
-import logging
 from typing import Any
+
+import structlog
 
 
 class SimpleVault(ABC):
-    def __init__(self, logger: logging.Logger, client: Any):
+    """A SimpleVault to abstract cloud secret vaults"""
+
+    def __init__(self, logger: structlog.BoundLogger, client: Any):
         """
         Initialize the SimpleVault class with a logger and a client.
 

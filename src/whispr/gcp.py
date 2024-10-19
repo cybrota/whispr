@@ -1,11 +1,21 @@
-import logging
+"""GCP Secrets Manager"""
+
 import json
 
+import structlog
 from google.cloud import secretmanager
+
 from whispr.vault import SimpleVault
 
+
 class GCPVault(SimpleVault):
-    def __init__(self, logger: logging.Logger, client: secretmanager.SecretManagerServiceClient):
+    """A Vault that maps secrets in GCP Secrets Manager"""
+
+    def __init__(
+        self,
+        logger: structlog.BoundLogger,
+        client: secretmanager.SecretManagerServiceClient,
+    ):
         """
         Initialize the GCP Vault.
 
@@ -24,7 +34,7 @@ class GCPVault(SimpleVault):
         try:
             secret_name = f"projects/my-project/secrets/{secret_name}/versions/latest"
             response = self.client.access_secret_version(name=secret_name)
-            secret_data = response.payload.data.decode('UTF-8')
+            secret_data = response.payload.data.decode("UTF-8")
             self.logger.info(f"Successfully fetched secret: {secret_name}")
             return json.dumps({"value": secret_data})
         except Exception as e:

@@ -1,11 +1,17 @@
-import logging
+"""Azure Key Vault"""
+
 import json
 
 from azure.keyvault.secrets import SecretClient
+import structlog
+
 from whispr.vault import SimpleVault
 
+
 class AzureKeyVault(SimpleVault):
-    def __init__(self, logger: logging.Logger, client: SecretClient):
+    """A Vault that maps secrets in Azure Key Vault"""
+
+    def __init__(self, logger: structlog.BoundLogger, client: SecretClient):
         """
         Initialize the Azure Vault.
 
