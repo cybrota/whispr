@@ -1,17 +1,17 @@
 """Azure Key Vault"""
 
-import json
-
 import structlog
 from azure.keyvault.secrets import SecretClient
-
+import azure.core.exceptions
 from whispr.vault import SimpleVault
 
 
-class AzureKeyVault(SimpleVault):
+class AzureVault(SimpleVault):
     """A Vault that maps secrets in Azure Key Vault"""
 
-    def __init__(self, logger: structlog.BoundLogger, client: SecretClient):
+    def __init__(
+        self, logger: structlog.BoundLogger, client: SecretClient, vault_url: str
+    ):
         """
         Initialize the Azure Vault.
 
@@ -19,8 +19,9 @@ class AzureKeyVault(SimpleVault):
         :param client: Azure Key Vault client.
         """
         super().__init__(logger, client)
+        self.vault_url = vault_url
 
-    def fetch_secret(self, secret_name: str) -> str:
+    def fetch_secrets(self, secret_name: str) -> str:
         """
         Fetch the secret from Azure Key Vault.
 
@@ -30,7 +31,12 @@ class AzureKeyVault(SimpleVault):
         try:
             secret = self.client.get_secret(secret_name)
             self.logger.info(f"Successfully fetched secret: {secret_name}")
-            return json.dumps({"value": secret.value})
+            return secret.value
+        except azure.core.exceptions.ResourceNotFoundError:
+            self.logger.error(
+                f"The given secret: {secret_name} is not found on azure vault. Please check the secret name, vault name or subscription ID."
+            )
+            return ""
         except Exception as e:
             self.logger.error(f"Error fetching secret: {secret_name}, Error: {e}")
             raise
