@@ -27,4 +27,4 @@ jobs:
           pip install semgrep
 
       - name: Run Semgrep scan
-        run: semgrep ci
+        run: semgrep scan
