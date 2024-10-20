@@ -30,7 +30,7 @@ jobs:
           pip install hatch
 
       - name: Build the package
-        run: hatch build -e release
+        run: hatch build
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
