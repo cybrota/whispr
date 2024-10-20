@@ -19,7 +19,7 @@ class AWSVault(SimpleVault):
         """
         super().__init__(logger, client)
 
-    def fetch_secret(self, secret_name: str) -> str:
+    def fetch_secrets(self, secret_name: str) -> str:
         """
         Fetch the secret from AWS Secrets Manager.
 
@@ -28,7 +28,7 @@ class AWSVault(SimpleVault):
         """
         try:
             response = self.client.get_secret_value(SecretId=secret_name)
-            self.logger.info(f"Successfully fetched secret: {secret_name}")
+            self.logger.info(f"Successfully fetched aws secret: {secret_name}")
             return response.get("SecretString")
         except botocore.exceptions.ClientError as error:
             if error.response["Error"]["Code"] == "ResourceNotFoundException":

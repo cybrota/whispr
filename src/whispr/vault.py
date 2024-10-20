@@ -20,7 +20,7 @@ class SimpleVault(ABC):
         self.client = client
 
     @abstractmethod
-    def fetch_secret(self, secret_name: str) -> str:
+    def fetch_secrets(self, secret_name: str) -> str:
         """
         Abstract method to fetch the secret from the vault.
 
