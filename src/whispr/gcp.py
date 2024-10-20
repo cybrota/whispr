@@ -1,10 +1,8 @@
 """GCP Secrets Manager"""
 
-import json
-
 import structlog
 from google.cloud import secretmanager
-
+import google.api_core
 from whispr.vault import SimpleVault
 
 
@@ -15,6 +13,7 @@ class GCPVault(SimpleVault):
         self,
         logger: structlog.BoundLogger,
         client: secretmanager.SecretManagerServiceClient,
+        project_id: str,
     ):
         """
         Initialize the GCP Vault.
@@ -23,8 +22,9 @@ class GCPVault(SimpleVault):
         :param client: GCP Secret Manager client.
         """
         super().__init__(logger, client)
+        self.project_id = project_id
 
-    def fetch_secret(self, secret_name: str) -> str:
+    def fetch_secrets(self, secret_name: str) -> str:
         """
         Fetch the secret from GCP Secret Manager.
 
@@ -32,11 +32,20 @@ class GCPVault(SimpleVault):
         :return: Secret value as a Key/Value JSON string.
         """
         try:
-            secret_name = f"projects/my-project/secrets/{secret_name}/versions/latest"
+            secret_name = (
+                f"projects/{self.project_id}/secrets/{secret_name}/versions/latest"
+            )
             response = self.client.access_secret_version(name=secret_name)
             secret_data = response.payload.data.decode("UTF-8")
-            self.logger.info(f"Successfully fetched secret: {secret_name}")
-            return json.dumps({"value": secret_data})
+            self.logger.info(f"Successfully fetched gcp secret: {secret_name}")
+            return secret_data
+        except google.api_core.exceptions.NotFound:
+            self.logger.error(
+                f"The given secret: {secret_name} is not found on gcp vault."
+            )
+            return ""
         except Exception as e:
-            self.logger.error(f"Error fetching secret: {secret_name}, Error: {e}")
-            raise
+            self.logger.error(
+                f"Error encountered while fetching secret: {secret_name}, Error: {e}"
+            )
+            return ""
