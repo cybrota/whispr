@@ -10,6 +10,34 @@ from dotenv import dotenv_values
 
 from whispr.factory import VaultFactory
 from whispr.logging import logger
+from whispr.enums import VaultType
+
+
+def write_to_yaml_file(config: dict, file_name: str):
+    """Writes a given config object to a file in YAML format"""
+    if not os.path.exists(file_name):
+        with open(file_name, "w", encoding="utf-8") as file:
+            yaml.dump(config, file)
+        logger.info(f"{file_name} has been created.")
+
+
+def prepare_vault_config(vault_name: str) -> dict:
+    """Prepares configuration for a given vault"""
+    config = {
+        "env_file": ".env",
+        "secret_name": "<your_secret_name>",
+        "vault": VaultType.AWS.value,
+    }
+
+    # Add more configuration fields as needed for other secret managers.
+    if vault_name == VaultType.GCP.value:
+        config["project_id"] = "<gcp_project_id>"
+        config["vault"] = VaultType.GCP.value
+    elif vault_name == VaultType.AZURE.value:
+        config["vault_url"] = "<azure_vault_url>"
+        config["vault"] = VaultType.AZURE.value
+
+    return config
 
 
 def execute_command(command: tuple):
@@ -22,19 +50,27 @@ def execute_command(command: tuple):
         )
 
 
-def fetch_secrets(config) -> dict:
+def fetch_secrets(config: dict) -> dict:
     """Fetch secret from relevant vault"""
+    kwargs = config
+    kwargs["logger"] = logger
 
     vault = config.get("vault")
     secret_name = config.get("secret_name")
+
     if not vault or not secret_name:
         logger.error(
             "Vault type or secret name not specified in the configuration file."
         )
         return {}
 
-    vault_instance = VaultFactory.get_vault(vault_type=vault, logger=logger)
-    secret_string = vault_instance.fetch_secret(secret_name)
+    try:
+        vault_instance = VaultFactory.get_vault(**kwargs)
+    except ValueError as e:
+        logger.error(e)
+        return {}
+
+    secret_string = vault_instance.fetch_secrets(secret_name)
     if not secret_string:
         return {}
 

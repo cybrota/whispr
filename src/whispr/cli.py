@@ -3,10 +3,16 @@
 import os
 
 import click
-import yaml
 
 from whispr.logging import logger
-from whispr.utils import execute_command, fetch_secrets, get_filled_secrets, load_config
+from whispr.utils import (
+    execute_command,
+    fetch_secrets,
+    get_filled_secrets,
+    load_config,
+    prepare_vault_config,
+    write_to_yaml_file,
+)
 
 CONFIG_FILE = "whispr.yaml"
 
@@ -18,20 +24,11 @@ def cli():
 
 
 @click.command()
-def init():
+@click.argument("vault", nargs=1, type=click.STRING)
+def init(vault):
     """Creates a whispr configuration file"""
-
-    config = {
-        "env_file": ".env",
-        "secret_name": "<your_secret_name>",
-        "vault": "aws",  # Options: aws, vault, 1password
-        # Add more configuration fields as needed for other secret managers.
-    }
-
-    if not os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "w", encoding="utf-8") as file:
-            yaml.dump(config, file)
-        logger.info(f"{CONFIG_FILE} has been created.")
+    config = prepare_vault_config(vault)
+    write_to_yaml_file(config, CONFIG_FILE)
 
 
 @click.command()

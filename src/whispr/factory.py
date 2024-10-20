@@ -1,5 +1,7 @@
 """Vault factory"""
 
+import os
+
 import boto3
 import structlog
 from azure.identity import DefaultAzureCredential
@@ -7,16 +9,17 @@ from azure.keyvault.secrets import SecretClient
 from google.cloud import secretmanager
 
 from whispr.aws import AWSVault
-from whispr.azure import AzureKeyVault
+from whispr.azure import AzureVault
 from whispr.gcp import GCPVault
 from whispr.vault import SimpleVault
+from whispr.enums import VaultType
 
 
 class VaultFactory:
+    """A factory class to create client objects"""
+
     @staticmethod
-    def get_vault(
-        vault_type: str, logger: structlog.BoundLogger, **kwargs
-    ) -> SimpleVault:
+    def get_vault(**kwargs) -> SimpleVault:
         """
         Factory method to return the appropriate secret manager based on the vault type.
 
@@ -25,29 +28,36 @@ class VaultFactory:
         :param kwargs: Any additional parameters required for specific vault clients.
         :return: An instance of a concrete Secret manager class.
         """
-        if vault_type == "aws":
+        vault_type = kwargs.get("vault")
+        logger: structlog.BoundLogger = kwargs.get("logger")
+        logger.info("Initializing vault", vault_type=vault_type)
+
+        if vault_type == VaultType.AWS.value:
             client = boto3.client("secretsmanager")
-            logger.info(f"Initializing {vault_type} vault")
             return AWSVault(logger, client)
 
-        elif vault_type == "azure":
+        elif vault_type == VaultType.AZURE.value:
             vault_url = kwargs.get("vault_url")
-
             if not vault_url:
                 raise ValueError(
-                    f"Vault type: {vault_type} needs 'vault_url' set in whispr configuration."
+                    f"Vault type: {vault_type} needs a 'vault_url' set in 'whispr.yaml' file"
                 )
 
             client = SecretClient(
                 vault_url=vault_url, credential=DefaultAzureCredential()
             )
-            logger.info(f"Initializing {vault_type} vault")
-            return AzureKeyVault(logger, client)
+            return AzureVault(logger, client, vault_url)
 
-        elif vault_type == "gcp":
-            client = kwargs.get("client", secretmanager.SecretManagerServiceClient())
-            logger.info(f"Initializing {vault_type} vault")
-            return GCPVault(logger, client)
+        elif vault_type == VaultType.GCP.value:
+            project_id = kwargs.get("project_id")
+            if not project_id:
+                raise ValueError(
+                    f"Project ID is not supplied for vault: {vault_type}. \
+                    Please set the 'project_id' key in whispr.yaml config file to continue."
+                )
+            client = secretmanager.SecretManagerServiceClient()
 
+            return GCPVault(logger, client, project_id)
+        # TODO: Add HashiCorp Vault implementation
         else:
             raise ValueError(f"Unsupported vault type: {vault_type}")
