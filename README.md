@@ -41,7 +41,9 @@ pip install whispr
 
 **Step 1: Initialize Whispr**
 
-Run `whispr init` in your terminal to create a `whispr.yaml` file in your project root. This file will store your configuration settings.
+Run `whispr init <vault_type>` in your terminal to create a `whispr.yaml` file in your project root. This file will store your configuration settings.
+
+The available vault types are: `aws`, `azure`, and `gcp`.  
 
 **Example whispr.yaml contents (For: AWS):**
 ```yaml
