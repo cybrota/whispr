@@ -19,7 +19,9 @@ Step 2: Initialize a whispr configuration file for AWS.
 whispr init aws
 ```
 
-Step 3: Define a `.env` file with secrets stored in AWS
+This creates a file called `whispr.yaml`. Update the details.
+
+Step 3: Define a `.env` file with secrets stored in AWS (Assuming secrets with below names exist in remote secret as key value pair)
 ```bash
 DB_USERNAME=
 DB_PASSWORD=
