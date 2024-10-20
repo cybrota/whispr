@@ -25,3 +25,7 @@ whispr run 'node script.js'
 ```
 
 DB_USERNAME & DB_PASSWORD are now available in Node.js program environment.
+
+## References:
+
+* https://cloud.google.com/sdk/docs/initializing
