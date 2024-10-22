@@ -1,3 +1,5 @@
+[![Downloads](https://static.pepy.tech/badge/whispr/month)](https://pepy.tech/project/whispr)
+
 # Whispr
 
 ![Logo](./logo.png)
@@ -67,7 +69,7 @@ POSTGRES_PASSWORD=
 
 **Step 3: Authenticating to Your Vault (Ex:AWS)**
 
-*   Authenticate to AWS via `aws sso login`.
+*   Authenticate to AWS using Short-term credentials.
 *   Alternatively, set temporary AWS credentials using a config file or environment variables.
   
 **Note**: Use respective authentication methods for other vaults.
