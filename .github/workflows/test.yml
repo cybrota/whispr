@@ -32,5 +32,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          coverage run --source=whispr -m pytest tests/
+          pytest --cov=whispr tests
           coveralls
