@@ -29,6 +29,8 @@ jobs:
           pip install coveralls
 
       - name: Run Test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           coverage run -m  pytest tests
           coveralls
