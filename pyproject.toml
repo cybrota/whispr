@@ -40,7 +40,7 @@ dependencies = [
     "structlog==24.4.0",
     "azure-keyvault==4.2.0",
     "azure-identity==1.19.0",
-    "hvac==2.3.0"
+    "hvac==2.3.0",
 ]
 [project.urls]
 Documentation = "https://github.com/narenaryan/whispr/blob/main/README.md"
@@ -60,9 +60,10 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 dependencies = ["mypy>=1.0.0"]
 
 [tool.coverage.run]
-source_pkgs = ["whispr", "tests"]
+source_pkgs = ["whispr"]
 branch = true
 parallel = true
+relative_files = true
 omit = ["src/whispr/__about__.py"]
 
 [tool.coverage.paths]
