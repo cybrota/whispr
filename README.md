@@ -1,10 +1,11 @@
 [![Downloads](https://static.pepy.tech/badge/whispr/month)](https://pepy.tech/project/whispr)
+[![Coverage Status](https://coveralls.io/repos/github/narenaryan/whispr/badge.svg)](https://coveralls.io/github/narenaryan/whispr)
 
 # Whispr
 
 ![Logo](./logo.png)
 
-Whispr (Pronounced as whisp-r) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
+Whispr (Pronounced as whisper) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
 
 Whispr uses keys (with empty values) specified in a `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
@@ -45,7 +46,7 @@ pip install whispr
 
 Run `whispr init <vault_type>` in your terminal to create a `whispr.yaml` file in your project root. This file will store your configuration settings.
 
-The available vault types are: `aws`, `azure`, and `gcp`.  
+The available vault types are: `aws`, `azure`, and `gcp`.
 
 **Example whispr.yaml contents (For: AWS):**
 ```yaml
@@ -71,7 +72,7 @@ POSTGRES_PASSWORD=
 
 *   Authenticate to AWS using Short-term credentials.
 *   Alternatively, set temporary AWS credentials using a config file or environment variables.
-  
+
 **Note**: Use respective authentication methods for other vaults.
 
 ## Launch any Application using Whispr
