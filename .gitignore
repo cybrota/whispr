@@ -28,3 +28,4 @@ lib64/
 # Secrets
 .env
 *.creds
+.coverage*
