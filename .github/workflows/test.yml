@@ -26,13 +26,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_test.txt
+          pip install coveralls
 
       - name: Run Test
         run: |
           coverage run -m  pytest tests
-
-      - name: Upload coverage to Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
-        with:
-          parallel: true
-          flag-name: Unit Test
+          coveralls
