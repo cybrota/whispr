@@ -6,11 +6,11 @@ from unittest.mock import Mock, MagicMock, patch
 import botocore.exceptions
 import structlog
 
-from src.whispr.vault import SimpleVault
-from src.whispr.aws import AWSVault
+from whispr.vault import SimpleVault
+from whispr.aws import AWSVault
 
 
-class TestAWSVault(unittest.TestCase):
+class AWSVaultTestCase(unittest.TestCase):
     """Unit tests for AWSVault class, which fetches secrets from AWS Secrets Manager."""
 
     def setUp(self):
@@ -47,7 +47,7 @@ class TestAWSVault(unittest.TestCase):
             secret_name="non_existent_secret",
         )
 
-    @patch("src.whispr.aws.AWSVault.fetch_secrets")
+    @patch("whispr.aws.AWSVault.fetch_secrets")
     def test_fetch_secrets_unrecognized_client_exception(self, mock_fetch_secrets):
         """Test fetch_secrets handles UnrecognizedClientException gracefully."""
         mock_fetch_secrets.side_effect = botocore.exceptions.ClientError(

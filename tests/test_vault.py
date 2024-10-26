@@ -2,12 +2,13 @@
 
 import unittest
 from unittest.mock import Mock, patch
+
 import structlog
 
-from src.whispr.vault import SimpleVault
+from whispr.vault import SimpleVault
 
 
-class SimpleVaultTest(unittest.TestCase):
+class SimpleVaultTestCase(unittest.TestCase):
     """Tests for Vault"""
 
     def setUp(self):

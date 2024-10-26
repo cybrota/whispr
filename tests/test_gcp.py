@@ -6,11 +6,11 @@ from unittest.mock import Mock, patch, MagicMock
 import google.api_core.exceptions
 import structlog
 
-from src.whispr.vault import SimpleVault
-from src.whispr.gcp import GCPVault
+from whispr.vault import SimpleVault
+from whispr.gcp import GCPVault
 
 
-class TestGCPVault(unittest.TestCase):
+class GCPVaultTestCase(unittest.TestCase):
     """Unit tests for GCPVault class, which fetches secrets from GCP Secrets Manager."""
 
     def setUp(self):

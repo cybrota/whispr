@@ -10,7 +10,7 @@ on:
 env:
   PYTHONPATH: ./src # Needed for tests to discover whispr package
 jobs:
-  semgrep-scan:
+  test:
     runs-on: ubuntu-22.04
 
     steps:
