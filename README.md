@@ -54,6 +54,15 @@ env_file: '.env'
 secret_name: <your_secret>
 vault: aws
 ```
+This default configuration will inject fetched secrets into `os.environ` of main process. If your app instead want to receive secrets as STDIN arguments, use `no_env: true` field.
+This is a secure way than default control but app now should parse arguments itself.
+
+```yaml
+env_file: '.env'
+secret_name: <your_secret>
+vault: aws
+no_env: true # Setting true will send KEY1=VAL1 secret pairs as command args
+```
 
 ## Setting Up Your Injectable Secrets
 

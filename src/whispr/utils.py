@@ -40,10 +40,24 @@ def prepare_vault_config(vault_name: str) -> dict:
     return config
 
 
-def execute_command(command: tuple):
+def execute_command(command: tuple, no_env: bool, creds: dict):
     """Executes a Unix/Windows command"""
+    if not creds:
+        creds = {}
+
     try:
-        subprocess.run(shlex.split(command[0]), env=os.environ, shell=False, check=True)
+        usr_command = shlex.split(command[0])
+
+        if no_env:
+            # Pass as --env K=V format (secure)
+            usr_command.extend([
+                f"{k}={v}" for k,v in creds.items()
+            ])
+        else:
+            # Pass via environment (slightly insecure)
+            os.environ.update(creds)
+
+        subprocess.run(usr_command, env=os.environ, shell=False, check=True)
     except subprocess.CalledProcessError:
         logger.error(
             f"Encountered a problem while running command: '{command[0]}'. Aborting."
@@ -87,7 +101,6 @@ def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
     for key in env_vars:
         if key in vault_secrets:
             filled_secrets[key] = vault_secrets[key]  # Collect the matching secrets
-            os.environ[key] = vault_secrets[key]  # Update the current environment
         else:
             logger.warning(
                 f"The given key: '{key}' is not found in vault. So ignoring it."
