@@ -65,10 +65,9 @@ def run(command):
         return
 
     filled_env_vars = get_filled_secrets(env_file, vault_secrets)
-    os.environ.update(filled_env_vars)
-    logger.info("Secrets have been successfully injected into the environment")
 
-    execute_command(command)
+    no_env = config.get("no_env")
+    execute_command(command, no_env, filled_env_vars)
 
 
 cli.add_command(init)
