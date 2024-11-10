@@ -5,13 +5,16 @@ import os
 import click
 
 from whispr.logging import logger
-from whispr.utils import (
-    execute_command,
+from whispr.utils.io import (
+    load_config,
+    write_to_yaml_file,
+)
+from whispr.utils.process import execute_command
+
+from whispr.utils.vault import (
     fetch_secrets,
     get_filled_secrets,
-    load_config,
-    prepare_vault_config,
-    write_to_yaml_file,
+    prepare_vault_config
 )
 
 CONFIG_FILE = "whispr.yaml"
@@ -66,8 +69,8 @@ def run(command):
 
     filled_env_vars = get_filled_secrets(env_file, vault_secrets)
 
-    no_env = config.get("no_env")
-    execute_command(command, no_env, filled_env_vars)
+    no_env = config.get("no_env", False)
+    execute_command(command, no_env=no_env, secrets=filled_env_vars)
 
 
 cli.add_command(init)
