@@ -7,8 +7,7 @@ on:
   pull_request:
     branches:
       - "*"
-env:
-  PYTHONPATH: ./src # Needed for tests to discover whispr package
+
 jobs:
   test:
     runs-on: ubuntu-22.04

@@ -82,3 +82,7 @@ packages = ["src/whispr"]
 [tool.pyright]
 venvPath = "/opt/homebrew/Caskroom/miniconda"
 venv = "whispr"
+
+[tool.pytest.ini_options]
+addopts = "--cov=ctxguard"
+pythonpath = ["src"]
