@@ -29,3 +29,4 @@ lib64/
 .env
 *.creds
 .coverage*
+!.coveragerc
