@@ -3,7 +3,7 @@
 
 # Whispr
 
-![Logo](./logo.png)
+![Logo](https://github.com/narenaryan/whispr/raw/main/logo.png)
 
 Whispr (Pronounced as whisper) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
 
@@ -20,7 +20,7 @@ Key Features of Whispr:
 
 Supported Vault Technologies:
 
-![Supported-vaults](./whispr-supported.png)
+![Supported-vaults](https://github.com/narenaryan/whispr/raw/main/whispr-supported.png)
 
 
 # Why use Whispr ?
@@ -97,12 +97,13 @@ whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. 
 whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory with Semgrep SAST tool.
 ```
 
-## Whispr Architecture
+## Programmatic Access
 
-![Supported-vaults](./whispr-arch.png)
+Whispr can also be used programmatically from Python code. See this guide for more information.
+
+https://github.com/narenaryan/whispr/blob/docs/main/usage-guides/programmatic-access.md
 
 # TODO
 
-* Add unit tests
 * Support HashiCorp Vault
 * Support 1Password Vault
