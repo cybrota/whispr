@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -16,6 +17,7 @@ class FactoryTestCase(unittest.TestCase):
     def setUp(self):
         """Set up mocks for logger, GCP client, and project_id before each test."""
         self.mock_logger = MagicMock()
+        os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
 
     def test_get_aws_vault_simple_client(self):
         """Test AWSVault client without SSO"""
@@ -52,6 +54,7 @@ class FactoryTestCase(unittest.TestCase):
             "sso_profile": "dev",
             "logger": self.mock_logger,
         }
+
         mock_session.side_effect = botocore.exceptions.ProfileNotFound(profile="dev")
         with self.assertRaises(ValueError):
             VaultFactory.get_vault(**config)
