@@ -1,7 +1,5 @@
 """Vault factory"""
 
-import os
-
 import boto3
 import botocore.exceptions
 import structlog
@@ -22,7 +20,7 @@ class VaultFactory:
     @staticmethod
     def get_vault(**kwargs) -> SimpleVault:
         """
-        Factory method to return the appropriate secret manager based on the vault type.
+        Factory method to return the appropriate secrets manager client based on the vault type.
 
         :param vault_type: The type of the vault ('aws', 'azure', 'gcp').
         :param logger: Structlog logger instance.

@@ -1,12 +1,10 @@
 """Tests for AWS module"""
 
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import botocore.exceptions
-import structlog
 
-from whispr.vault import SimpleVault
 from whispr.aws import AWSVault
 
 
