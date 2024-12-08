@@ -3,6 +3,7 @@
 import os
 
 import boto3
+import botocore.exceptions
 import structlog
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
@@ -29,11 +30,22 @@ class VaultFactory:
         :return: An instance of a concrete Secret manager class.
         """
         vault_type = kwargs.get("vault")
+        sso_profile = kwargs.get("sso_profile")
         logger: structlog.BoundLogger = kwargs.get("logger")
         logger.info("Initializing vault", vault_type=vault_type)
 
         if vault_type == VaultType.AWS.value:
             client = boto3.client("secretsmanager")
+
+            # When SSO profile is supplied use the session client
+            if sso_profile:
+                try:
+                    session = boto3.Session(profile_name=sso_profile)
+                    client = session.client("secretsmanager")
+                except botocore.exceptions.ProfileNotFound:
+                    raise ValueError(
+                        f"The config profile {sso_profile} could not be found for vault: `{vault_type}`. Please check your AWS SSO config file and retry."
+                    )
             return AWSVault(logger, client)
 
         elif vault_type == VaultType.AZURE.value:
