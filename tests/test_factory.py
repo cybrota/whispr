@@ -83,7 +83,8 @@ class FactoryTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             VaultFactory.get_vault(**config)
 
-    def test_get_gcp_vault_client(self):
+    @patch("google.cloud.secretmanager.SecretManagerServiceClient")
+    def test_get_gcp_vault_client(self, mock_client):
         """Test GCPVault client"""
         config = {
             "vault": "gcp",
@@ -94,6 +95,7 @@ class FactoryTestCase(unittest.TestCase):
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, GCPVault)
+        mock_client.assert_called_once()
 
     def test_get_gcp_vault_client_no_project_id(self):
         """Test GCPVault raises exception when project_id is not defined in config"""
