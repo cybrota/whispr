@@ -11,25 +11,25 @@ from whispr.utils.io import (
 )
 from whispr.utils.process import execute_command
 
-from whispr.utils.vault import (
-    fetch_secrets,
-    get_filled_secrets,
-    prepare_vault_config
-)
+from whispr.utils.vault import fetch_secrets, get_filled_secrets, prepare_vault_config
 
 CONFIG_FILE = "whispr.yaml"
 
 
 @click.group()
 def cli():
-    """Click group"""
+    """Whispr is a CLI tool to safely inject vault secrets into an application.
+    Run `whispr init vault` to create a configuration.
+
+    Availble values for vault: ["aws", "azure", "gcp"]
+    """
     pass
 
 
 @click.command()
 @click.argument("vault", nargs=1, type=click.STRING)
 def init(vault):
-    """Creates a whispr configuration file"""
+    """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc."""
     config = prepare_vault_config(vault)
     write_to_yaml_file(config, CONFIG_FILE)
 
@@ -37,7 +37,9 @@ def init(vault):
 @click.command()
 @click.argument("command", nargs=-1, type=click.UNPROCESSED)
 def run(command):
-    """Fetches secrets and injects them into the environment."""
+    """Runs a command by injecting secrets fetched from vault via environment or list of command arguments.
+    Examples: [whispr run 'python main.py', whispr run 'bash script.sh']
+    """
     if not os.path.exists(CONFIG_FILE):
         logger.error("whispr configuration file not found. Run 'whispr init' first.")
         return

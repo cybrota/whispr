@@ -1,12 +1,10 @@
 """Tests for GCP module"""
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock
 
 import google.api_core.exceptions
-import structlog
 
-from whispr.vault import SimpleVault
 from whispr.gcp import GCPVault
 
 

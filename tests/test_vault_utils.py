@@ -43,18 +43,28 @@ class SecretUtilsTestCase(unittest.TestCase):
         )
 
     @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
-    @patch("whispr.utils.vault.VaultFactory.get_vault", side_effect=ValueError("Invalid vault type"))
+    @patch(
+        "whispr.utils.vault.VaultFactory.get_vault",
+        side_effect=ValueError("Invalid vault type"),
+    )
     def test_fetch_secrets_invalid_vault(self, mock_get_vault, mock_logger):
         """Test fetch_secrets logs an error if the vault factory raises a ValueError."""
-        result = fetch_secrets({
-            "vault": "UNKOWN",
-            "secret_name": "test_secret",
-        })
+        result = fetch_secrets(
+            {
+                "vault": "UNKOWN",
+                "secret_name": "test_secret",
+            }
+        )
 
         self.assertEqual(result, {})
-        mock_logger.error.assert_called_once_with("Error creating vault instance: Invalid vault type")
+        mock_logger.error.assert_called_once_with(
+            "Error creating vault instance: Invalid vault type"
+        )
 
-    @patch("whispr.utils.vault.dotenv_values", return_value={"API_KEY": "", "OTHER_KEY": ""})
+    @patch(
+        "whispr.utils.vault.dotenv_values",
+        return_value={"API_KEY": "", "OTHER_KEY": ""},
+    )
     @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
     def test_get_filled_secrets_partial_match(self, mock_logger, mock_dotenv_values):
         """Test get_filled_secrets fills only matching secrets from vault_secrets."""

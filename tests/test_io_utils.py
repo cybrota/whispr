@@ -1,10 +1,10 @@
-
 import os
 import yaml
 import unittest
 
 from unittest.mock import MagicMock, patch, mock_open
 from whispr.utils.io import write_to_yaml_file, load_config
+
 
 class IOUtilsTestCase(unittest.TestCase):
     """Unit tests for the file utilities: write_to_yaml_file and load_config."""
@@ -18,7 +18,9 @@ class IOUtilsTestCase(unittest.TestCase):
     @patch("whispr.utils.io.logger", new_callable=lambda: MagicMock())
     @patch("builtins.open", new_callable=mock_open)
     @patch("os.path.exists", return_value=False)
-    def test_write_to_yaml_file_creates_file(self, mock_exists, mock_open_file, mock_logger):
+    def test_write_to_yaml_file_creates_file(
+        self, mock_exists, mock_open_file, mock_logger
+    ):
         """Test that write_to_yaml_file creates a new file and writes config data as YAML."""
         write_to_yaml_file(self.config, self.file_path)
 
@@ -29,7 +31,9 @@ class IOUtilsTestCase(unittest.TestCase):
     @patch("whispr.utils.io.logger", new_callable=lambda: MagicMock())
     @patch("builtins.open", new_callable=mock_open)
     @patch("os.path.exists", return_value=True)
-    def test_write_to_yaml_file_does_not_overwrite_existing_file(self, mock_exists, mock_open_file, mock_logger):
+    def test_write_to_yaml_file_does_not_overwrite_existing_file(
+        self, mock_exists, mock_open_file, mock_logger
+    ):
         """Test that write_to_yaml_file does not overwrite an existing file."""
         write_to_yaml_file(self.config, self.file_path)
 

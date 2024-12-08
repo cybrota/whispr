@@ -4,9 +4,10 @@ import shlex
 
 from whispr.logging import logger
 
+
 def execute_command(command: tuple, no_env: bool, secrets: dict):
     """Executes a Unix/Windows command.
-       Arg: `no_env` decides whether secrets are passed vai environment or K:V pairs in command arguments.
+    Arg: `no_env` decides whether secrets are passed vai environment or K:V pairs in command arguments.
     """
     if not secrets:
         secrets = {}
@@ -16,9 +17,7 @@ def execute_command(command: tuple, no_env: bool, secrets: dict):
 
         if no_env:
             # Pass as --env K=V format (secure)
-            usr_command.extend([
-                f"{k}={v}" for k,v in secrets.items()
-            ])
+            usr_command.extend([f"{k}={v}" for k, v in secrets.items()])
         else:
             # Pass via environment (slightly insecure)
             os.environ.update(secrets)
