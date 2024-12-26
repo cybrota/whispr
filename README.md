@@ -9,6 +9,8 @@ Whispr (Pronounced as whisper) is a CLI tool to safely inject secrets from your 
 
 Whispr uses keys (with empty values) specified in a `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
+Install whispr easily with pip!
+
 ```bash
 pip install whispr
 ```
@@ -110,7 +112,7 @@ config = {
 
 secrets = fetch_secrets(config)
 
-# Now, inject secrets into your command's environment by calling this function
+# Now, inject secrets into your command's environment
 command = "ls -l"
 cp = execute_command(command.split(), no_env=False, secrets=secrets) #cp is CompletedProcess object.
 ```
