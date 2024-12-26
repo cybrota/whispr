@@ -1,5 +1,7 @@
 """Vault factory"""
 
+import os
+
 import boto3
 import botocore.exceptions
 import structlog
@@ -18,6 +20,32 @@ class VaultFactory:
     """A factory class to create client objects"""
 
     @staticmethod
+    def _get_aws_region(kwargs: dict) -> str:
+        """
+        Retrieves the AWS region from the provided kwargs or environment variable.
+
+        :param kwargs: Any additional parameters required for specific vault clients.
+
+        Order of preference:
+          1. 'region' key in kwargs
+          2. AWS_DEFAULT_REGION environment variable
+
+        Raises:
+            ValueError: If neither source provides a region."""
+
+        region = kwargs.get("region")
+
+        if not region:
+            region = os.environ.get("AWS_DEFAULT_REGION")
+
+        if not region:
+            raise ValueError(
+                "AWS Region not found. Please fill the `region` (Ex: us-west-2) in Whispr config or set AWS_DEFAULT_REGION environment variable."
+            )
+
+        return region
+
+    @staticmethod
     def get_vault(**kwargs) -> SimpleVault:
         """
         Factory method to return the appropriate secrets manager client based on the vault type.
@@ -26,6 +54,9 @@ class VaultFactory:
         :param logger: Structlog logger instance.
         :param kwargs: Any additional parameters required for specific vault clients.
         :return: An instance of a concrete Secret manager class.
+
+        Raises:
+            ValueError: If sufficient information is not avaiable to initialize vault instance.
         """
         vault_type = kwargs.get("vault")
         sso_profile = kwargs.get("sso_profile")
@@ -33,17 +64,19 @@ class VaultFactory:
         logger.info("Initializing vault", vault_type=vault_type)
 
         if vault_type == VaultType.AWS.value:
-            client = boto3.client("secretsmanager")
+            region = VaultFactory._get_aws_region(kwargs)
+            client = boto3.client("secretsmanager", region_name=region)
 
             # When SSO profile is supplied use the session client
             if sso_profile:
                 try:
                     session = boto3.Session(profile_name=sso_profile)
-                    client = session.client("secretsmanager")
+                    client = session.client("secretsmanager", region_name=region)
                 except botocore.exceptions.ProfileNotFound:
                     raise ValueError(
                         f"The config profile {sso_profile} could not be found for vault: `{vault_type}`. Please check your AWS SSO config file and retry."
                     )
+
             return AWSVault(logger, client)
 
         elif vault_type == VaultType.AZURE.value:

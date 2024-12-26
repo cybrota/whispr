@@ -35,6 +35,7 @@ class AWSVault(SimpleVault):
                 self.logger.error(
                     "The secret is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?",
                     secret_name=secret_name,
+                    region=self.client.meta.region_name,
                 )
                 return ""
             elif error.response["Error"]["Code"] == "UnrecognizedClientException":

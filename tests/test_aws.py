@@ -38,11 +38,14 @@ class AWSVaultTestCase(unittest.TestCase):
             {"Error": {"Code": "ResourceNotFoundException"}}, "get_secret_value"
         )
 
+        self.mock_client.meta.region_name = "us-east-1"
+
         result = self.vault.fetch_secrets("non_existent_secret")
         self.assertEqual(result, "")
         self.mock_logger.error.assert_called_with(
             "The secret is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?",
             secret_name="non_existent_secret",
+            region="us-east-1",
         )
 
     @patch("whispr.aws.AWSVault.fetch_secrets")

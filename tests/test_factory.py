@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 import unittest
 from unittest.mock import MagicMock, patch
@@ -11,13 +12,38 @@ from whispr.gcp import GCPVault
 from whispr.factory import VaultFactory
 
 
+def patch_env_var(var_name, var_value):
+    """
+    Test util to patch a given environment variable safely.
+
+    :param var_name: Environment variable to patch (Ex: AWS_DEFAULT_REGION)
+    :param var_value: Environment variable value for testing (Ex: us-east-1)
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            original_value = os.environ.get(var_name)
+            os.environ[var_name] = var_value
+            try:
+                return func(*args, **kwargs)
+            finally:
+                if original_value is not None:
+                    os.environ[var_name] = original_value
+                else:
+                    del os.environ[var_name]
+
+        return wrapper
+
+    return decorator
+
+
 class FactoryTestCase(unittest.TestCase):
     """Unit tests for Factory method to create vaults"""
 
     def setUp(self):
         """Set up mocks for logger, GCP client, and project_id before each test."""
         self.mock_logger = MagicMock()
-        os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
 
     def test_get_aws_vault_simple_client(self):
         """Test AWSVault client without SSO"""
@@ -26,6 +52,7 @@ class FactoryTestCase(unittest.TestCase):
             "env": ".env",
             "secret_name": "dummy_secret",
             "logger": self.mock_logger,
+            "region": "us-east-2",
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, AWSVault)
@@ -39,6 +66,7 @@ class FactoryTestCase(unittest.TestCase):
             "secret_name": "dummy_secret",
             "sso_profile": "dev",
             "logger": self.mock_logger,
+            "region": "us-east-2",
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, AWSVault)
@@ -53,11 +81,70 @@ class FactoryTestCase(unittest.TestCase):
             "secret_name": "dummy_secret",
             "sso_profile": "dev",
             "logger": self.mock_logger,
+            "region": "us-east-1",
         }
 
         mock_session.side_effect = botocore.exceptions.ProfileNotFound(profile="dev")
         with self.assertRaises(ValueError):
             VaultFactory.get_vault(**config)
+
+    @patch("boto3.client")
+    def test_get_aws_vault_region_passed_explicitly(self, mock_boto_client):
+        """Test AWSVault client with region passed explicitly in config"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "region": "us-west-2",  # Explicit region
+            "logger": self.mock_logger,
+        }
+        print(VaultFactory.get_vault(**config).client)
+        mock_boto_client.assert_called_with("secretsmanager", region_name="us-west-2")
+
+    @patch("boto3.client")
+    @patch_env_var("AWS_DEFAULT_REGION", "us-east-1")
+    def test_get_aws_vault_region_from_env_variable(self, mock_boto_client):
+        """Test AWSVault client with region from AWS_DEFAULT_REGION environment variable"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+        }
+        VaultFactory.get_vault(**config)
+        mock_boto_client.assert_called()
+        mock_boto_client.assert_called_with("secretsmanager", region_name="us-east-1")
+
+    @patch("boto3.client")
+    def test_get_aws_vault_region_not_passed_nor_in_env_raises_error(
+        self, mock_boto_client
+    ):
+        """Test AWSVault raises error when region is neither passed nor in AWS_DEFAULT_REGION environment variable"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+        }
+        with self.assertRaises(ValueError):
+            VaultFactory.get_vault(**config)
+        mock_boto_client.assert_not_called()  # Client should not be called if error is raised
+
+    @patch("boto3.client")
+    @patch_env_var("AWS_DEFAULT_REGION", "us-east-1")  # Set env variable
+    def test_get_aws_vault_region_passed_takes_precedence_over_env_variable(
+        self, mock_boto_client
+    ):
+        """Test AWSVault client with region passed explicitly takes precedence over AWS_DEFAULT_REGION environment variable"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "region": "us-west-2",  # Explicit region
+            "logger": self.mock_logger,
+        }
+        VaultFactory.get_vault(**config)
+        mock_boto_client.assert_called_with("secretsmanager", region_name="us-west-2")
 
     def test_get_azure_vault_client(self):
         """Test AzureVault client"""
