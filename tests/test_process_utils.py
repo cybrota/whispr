@@ -34,13 +34,23 @@ class ProcessUtilsTestCase(unittest.TestCase):
         self, mock_env_update, mock_subprocess_run, mock_logger
     ):
         """Test execute_command with `no_env=False`, passing secrets via environment variables."""
-        execute_command(self.command, no_env=False, secrets=self.secrets)
+        completed_process = subprocess.CompletedProcess(
+            args=["echo", "Hello"], returncode=0, stdout=b"Hello\n", stderr=b""
+        )
+        mock_subprocess_run.return_value = completed_process
+
+        result = execute_command(self.command, no_env=False, secrets=self.secrets)
 
         mock_env_update.assert_called_once_with(self.secrets)
         expected_command = ["echo", "Hello"]
         mock_subprocess_run.assert_called_once_with(
             expected_command, env=os.environ, shell=False, check=True
         )
+
+        self.assertIsInstance(result, subprocess.CompletedProcess)
+        self.assertEqual(
+            type(result.stdout), bytes
+        )  # Additional sanity check on stdout type
 
     @patch("whispr.utils.process.logger", new_callable=lambda: MagicMock())
     @patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "test"))
