@@ -9,7 +9,7 @@ from whispr.gcp import GCPVault
 
 from whispr.factory import VaultFactory
 
-from .utils import patch_env_var
+from tests.utils import patch_env_var
 
 
 class FactoryTestCase(unittest.TestCase):
