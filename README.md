@@ -9,6 +9,10 @@ Whispr (Pronounced as whisper) is a CLI tool to safely inject secrets from your 
 
 Whispr uses keys (with empty values) specified in a `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
+```bash
+pip install whispr
+```
+
 Key Features of Whispr:
 
 * **Safe Secret Injection**: Fetch and inject secrets from your desired vault using HTTPS, SSL encryption, strict CERT validation.
@@ -30,7 +34,7 @@ sensitive information in unencrypted files. To help developers, Whispr can safel
 credentials and mitigate advisory exploitation tactics.
 
 
-# Installation and Setup
+# Getting Started
 
 ## Installing Whispr
 
@@ -84,9 +88,36 @@ POSTGRES_PASSWORD=
 
 **Note**: Use respective authentication methods for other vaults.
 
-## Launch any Application using Whispr
+## Programmatic access of Whispr (Doesn't require a configuration file)
 
-Now, you can run any app using: `whispr run '<your_app_command_with_args>'` (mind the single quotes around command) to inject your secrets before starting the subprocess.
+In addition to installing Whispr as a tool, one can make use of core utility functions like this:
+
+```bash
+pip install whispr
+```
+
+Then from Python code you can import important functions like this:
+
+```py
+from whispr.utils.vault import fetch_secrets
+from whispr.utils.process import execute_command
+
+config = {
+  "vault": "aws",
+  "secret_name": "<your_secret_name>"
+}
+
+secrets = fetch_secrets(config)
+
+# Now, inject secrets into your command's environment by calling this function
+command = "ls -l"
+cp = execute_command(command.split(), no_env=False, secrets=secrets) #cp is CompletedProcess object.
+```
+
+That's it. This is a programmatic equivalent to the tool usage.
+
+## Launch any Application using Whispr (Requires a configuration file: `whispr.yaml`)
+In contrary to programmatic access, if you want to run a script/program do: `whispr run '<your_app_command_with_args>'` (mind the single quotes around command) to inject your secrets before starting the subprocess.
 
 Examples:
 ```bash
@@ -97,13 +128,11 @@ whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. 
 whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory with Semgrep SAST tool.
 ```
 
-## Programmatic Access
-
-Whispr can also be used programmatically from Python code. See this guide for more information.
-
-https://github.com/narenaryan/whispr/blob/docs/main/usage-guides/programmatic-access.md
-
 # TODO
 
-* Support HashiCorp Vault
-* Support 1Password Vault
+Support:
+
+* HashiCorp Vault
+* 1Password Vault
+* K8s secret patching
+* Container patching (docker)

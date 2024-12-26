@@ -5,7 +5,9 @@ import shlex
 from whispr.logging import logger
 
 
-def execute_command(command: tuple, no_env: bool, secrets: dict) -> subprocess.CompletedProcess[bytes]:
+def execute_command(
+    command: tuple, no_env: bool, secrets: dict
+) -> subprocess.CompletedProcess[bytes]:
     """Executes a Unix/Windows command.
     Arg: `no_env` decides whether secrets are passed vai environment or K:V pairs in command arguments.
     """
