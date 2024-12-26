@@ -1,3 +1,5 @@
+from functools import wraps
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -9,7 +11,31 @@ from whispr.gcp import GCPVault
 
 from whispr.factory import VaultFactory
 
-from tests.utils import patch_env_var
+
+def patch_env_var(var_name, var_value):
+    """
+    Test util to patch a given environment variable safely.
+
+    :param var_name: Environment variable to patch (Ex: AWS_DEFAULT_REGION)
+    :param var_value: Environment variable value for testing (Ex: us-east-1)
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            original_value = os.environ.get(var_name)
+            os.environ[var_name] = var_value
+            try:
+                return func(*args, **kwargs)
+            finally:
+                if original_value is not None:
+                    os.environ[var_name] = original_value
+                else:
+                    del os.environ[var_name]
+
+        return wrapper
+
+    return decorator
 
 
 class FactoryTestCase(unittest.TestCase):
