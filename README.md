@@ -30,7 +30,7 @@ Supported Vault Technologies:
 # Why use Whispr ?
 
 The MITRE ATT&CK Framework Tactic 8 (Credential Access) suggests that adversaries can exploit plain-text secrets and sensitive information stored in files like `.env`. It is essential to avoid storing
-sensitive information in unencrypted files. To help developers, Whispr can safely fetch and inject secrets from a vault into the current shell environment. This enables developers to securely manage
+sensitive information in unencrypted files. To help developers, Whispr can safely fetch and inject secrets from a vault into the app environment or pass them as standard input just in time. This enables developers to securely manage
 credentials and mitigate advisory exploitation tactics.
 
 
@@ -104,7 +104,8 @@ from whispr.utils.process import execute_command
 
 config = {
   "vault": "aws",
-  "secret_name": "<your_secret_name>"
+  "secret_name": "<your_secret_name>",
+  "region": "us-west-2"
 }
 
 secrets = fetch_secrets(config)
