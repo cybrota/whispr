@@ -85,4 +85,4 @@ venv = "whispr"
 
 [tool.pytest.ini_options]
 addopts = "--cov=whispr"
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
