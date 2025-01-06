@@ -1,6 +1,7 @@
 """whispr CLI entrypoint"""
 
 import os
+import json
 
 import click
 
@@ -77,6 +78,52 @@ def run(command):
 
 cli.add_command(init)
 cli.add_command(run)
+
+# Secret group
+
+@click.group()
+def secret():
+    """ Whispr secret sub-group manages a secret lifecycle.
+
+    Availble subcommands: [get, rotate]
+
+    Example: whispr secret get --vault=aw --secret-name=my-secret --region=us-west-2
+    """
+    pass
+
+cli.add_command(secret)
+
+@click.command()
+@click.option("--secret-name", nargs=1, type=click.STRING)
+@click.option("--vault", nargs=1, type=click.STRING)
+@click.option("--region", nargs=1, type=click.STRING)
+def get(region, vault, secret_name):
+    """Fetches a vault secret and prints to standard output in JSON format"""
+    if not vault:
+        logger.error(
+            f"No vault type is provided to secret get command. Use vault=aws/azure/gcp as vaules."
+        )
+        return
+
+    if not secret_name:
+        logger.error(
+            f"No secret name is provided to secret get command. Use secret_name=<name> option."
+        )
+        return
+
+    config = {
+        "secret_name": secret_name,
+        "vault": vault,
+        "region": region
+    }
+    # Fetch secret based on the vault type
+    vault_secrets = fetch_secrets(config)
+    if not vault_secrets:
+        return
+
+    print(json.dumps(vault_secrets, indent=4))
+
+secret.add_command(get)
 
 if __name__ == "__main__":
     cli()
