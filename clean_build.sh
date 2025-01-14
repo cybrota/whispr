@@ -1,4 +1,6 @@
 rm -rf dist
 pip uninstall -q --exists-action=w whispr
 hatch build
-pip install -q dist/whispr-$1-py3-none-any.whl
+VER=$(ls ./dist/*.whl | sed 's/.*-\([0-9.]*\)-.*/\1/')
+echo $VAR
+pip install -q dist/whispr-${VER}-py3-none-any.whl
