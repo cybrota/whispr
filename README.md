@@ -23,6 +23,7 @@ Key Features of Whispr:
 * **Customizable Configurations**: Configure project-level settings to manage multiple secrets for multiple projects.
 * **No Custom Scripts Required**: Whispr eliminates the need for custom bash scripts or cloud CLI tools to manage secrets, making it easy to get started.
 * **Easy Installation**: Cross-platform installation with PyPi.
+* **Generate Random Sequences for key rotation**: Whispr can generate crypto-safe random sequences with a given length. Great for secret rotation.
 
 Supported Vault Technologies:
 
@@ -35,6 +36,19 @@ The MITRE ATT&CK Framework Tactic 8 (Credential Access) suggests that adversarie
 sensitive information in unencrypted files. To help developers, Whispr can safely fetch and inject secrets from a vault into the app environment or pass them as standard input just in time. This enables developers to securely manage
 credentials and mitigate advisory exploitation tactics.
 
+Whispr can also comes with handy utilities like:
+
+1. Audit a secret from vault
+
+```sh
+whispr secret get --vault=aws --secret-name=my_secret --region=us-east-1
+```
+
+2. Generate a crypto-safe random sequences for rotated secrets
+
+```sh
+whispr secret gen-random --length=16 --exclude='*/^'
+```
 
 # Getting Started
 
@@ -90,9 +104,21 @@ POSTGRES_PASSWORD=
 
 **Note**: Use respective authentication methods for other vaults.
 
+## Launch any Application using Whispr (Requires a configuration file: `whispr.yaml`)
+In contrary to programmatic access, if you want to run a script/program do: `whispr run '<your_app_command_with_args>'` (mind the single quotes around command) to inject your secrets before starting the subprocess.
+
+Examples:
+```bash
+whispr run 'python main.py' # Inject secrets and run a Python program
+whispr run 'node server.js --threads 4' # Inject secrets and run a Node.js express server
+whispr run 'django manage.py runserver' # Inject secrets and start a Django server
+whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. Script should be permitted to execute
+whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory with Semgrep SAST tool.
+```
+
 ## Programmatic access of Whispr (Doesn't require a configuration file)
 
-In addition to installing Whispr as a tool, one can make use of core utility functions like this:
+Instead of using Whispr as an execution tool, a Python program can leverage core utility functions like this:
 
 ```bash
 pip install whispr
@@ -117,21 +143,9 @@ command = "ls -l"
 cp = execute_command(command.split(), no_env=False, secrets=secrets) #cp is CompletedProcess object.
 ```
 
-That's it. This is a programmatic equivalent to the tool usage.
+That's it. This is a programmatic equivalent to the tool usage which allows programs to fetch secrets from vault at run time.
 
-## Launch any Application using Whispr (Requires a configuration file: `whispr.yaml`)
-In contrary to programmatic access, if you want to run a script/program do: `whispr run '<your_app_command_with_args>'` (mind the single quotes around command) to inject your secrets before starting the subprocess.
-
-Examples:
-```bash
-whispr run 'python main.py' # Inject secrets and run a Python program
-whispr run 'node server.js --threads 4' # Inject secrets and run a Node.js express server
-whispr run 'django manage.py runserver' # Inject secrets and start a Django server
-whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. Script should be permitted to execute
-whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory with Semgrep SAST tool.
-```
-
-# TODO
+## TODO
 
 Support:
 
@@ -139,3 +153,4 @@ Support:
 * 1Password Vault
 * K8s secret patching
 * Container patching (docker)
+* Increase test coverage
