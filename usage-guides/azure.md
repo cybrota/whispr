@@ -18,7 +18,14 @@ Step 2: Initialize a whispr configuration file for Azure.
 ```bash
 whispr init azure
 ```
-This creates a file called `whispr.yaml`. Update the details.
+This creates a file called `whispr.yaml`. Update the below details.
+
+```yaml
+env_file: .env
+secret_name: my-secret
+vault: azure
+vault_url: https://my-creds.vault.azure.net/ # Required for Azure
+```
 
 Step 3: Define a `.env` file with secrets stored in Azure (Assuming secrets with below names exist in remote secret as key value pair)
 ```bash

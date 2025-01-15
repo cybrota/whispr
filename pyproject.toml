@@ -43,9 +43,9 @@ dependencies = [
     "hvac==2.3.0",
 ]
 [project.urls]
-Documentation = "https://github.com/narenaryan/whispr/blob/main/README.md"
-Issues = "https://github.com/narenaryan/whispr/issues"
-Source = "https://github.com/narenaryan/whispr"
+Documentation = "https://github.com/cybrota/whispr/blob/main/README.md"
+Issues = "https://github.com/cybrota/whispr/issues"
+Source = "https://github.com/cybrota/whispr"
 
 [tool.hatch.version]
 path = "src/whispr/__about__.py"

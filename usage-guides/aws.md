@@ -19,7 +19,15 @@ Step 2: Initialize a whispr configuration file for AWS.
 whispr init aws
 ```
 
-This creates a file called `whispr.yaml`. Update the details.
+This creates a file called `whispr.yaml`. Update the below details.
+
+```yaml
+env_file: .env
+secret_name: my-secret
+vault: aws
+region: us-west-2 # Required for AWS
+sso_profile: my_profile # Set in case using a SSO profile for authentication
+```
 
 Step 3: Define a `.env` file with secrets stored in AWS (Assuming secrets with below names exist in remote secret as key value pair)
 ```bash
