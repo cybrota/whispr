@@ -1,9 +1,11 @@
 import unittest
+import string
 from unittest.mock import patch, MagicMock
 import json
 from dotenv import dotenv_values
 
 from whispr.utils.vault import fetch_secrets, get_filled_secrets, prepare_vault_config
+from whispr.utils.crypto import generate_rand_secret
 from whispr.enums import VaultType
 
 
@@ -116,3 +118,75 @@ class SecretUtilsTestCase(unittest.TestCase):
             "vault_url": "<azure_vault_url>",
         }
         self.assertEqual(config, expected_config)
+
+
+class CryptoUtilitiesTestCase(unittest.TestCase):
+    """Unit tests for the crypto utilities: generate_rand_secret"""
+
+    def test_basic_generation(self):
+        """Test that a secret of the correct length is generated when no characters are excluded."""
+        length = 12
+        secret = generate_rand_secret(length, exclude_chars="")
+        self.assertEqual(len(secret), length)
+        # Check that all characters are from the default set
+        all_chars = string.ascii_letters + string.digits + string.punctuation
+        for ch in secret:
+            self.assertIn(ch, all_chars)
+
+    def test_exclusion_of_characters(self):
+        """Test that specified characters are excluded from the generated secret."""
+        length = 10
+        exclude_chars = "ABCabc123"
+        secret = generate_rand_secret(length, exclude_chars=exclude_chars)
+        # Ensure excluded characters are not present in the secret
+        for ch in exclude_chars:
+            self.assertNotIn(ch, secret)
+
+    def test_insufficient_characters(self):
+        """Test that ValueError is raised if too many characters are excluded, making generation impossible."""
+        length = 5
+        # Exclude almost everything except 4 characters
+        # For instance, exclude all uppercase letters, digits, punctuation
+        # plus 22 of the 26 lowercase letters, leaving only 4 possible chars.
+        # Then request length=5 => should raise ValueError.
+        exclude_chars = (
+            string.ascii_uppercase
+            + string.digits
+            + string.punctuation
+            + "abcdefghijklmnopqrstuvwxyz"[4:]
+        )
+        with self.assertRaises(ValueError):
+            generate_rand_secret(length, exclude_chars=exclude_chars)
+
+    @patch("secrets.choice", return_value="X")
+    def test_mocked_secrets_choice(self, mock_choice):
+        """
+        Test generate_rand_secret with secrets.choice mocked.
+        This ensures we verify the function calls and final output deterministically.
+        """
+        length = 5
+        secret = generate_rand_secret(length, exclude_chars="")
+        # Since mock returns "X" every time, the result should be "XXXXX"
+        self.assertEqual(secret, "XXXXX")
+
+        # Verify that secrets.choice was called exactly 'length' times
+        self.assertEqual(mock_choice.call_count, length)
+
+    def test_zero_length(self):
+        """
+        Test generating a secret of zero length (uncommon, but functionally should return an empty string).
+        """
+        secret = generate_rand_secret(0, exclude_chars="")
+        self.assertEqual(secret, "", "Zero-length secret should be an empty string.")
+
+    def test_all_punctuation_exclusion(self):
+        """
+        Test excluding all punctuation does not break the generation.
+        """
+        length = 8
+        exclude_chars = string.punctuation
+        secret = generate_rand_secret(length, exclude_chars=exclude_chars)
+        self.assertEqual(len(secret), length)
+        # Ensure no punctuation is in the result
+        for ch in secret:
+            self.assertNotIn(ch, string.punctuation)

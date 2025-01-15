@@ -12,17 +12,25 @@ from whispr.utils.io import (
 )
 from whispr.utils.process import execute_command
 
-from whispr.utils.vault import fetch_secrets, get_filled_secrets, prepare_vault_config
+from whispr.utils.vault import (
+    fetch_secrets,
+    get_filled_secrets,
+    prepare_vault_config,
+    get_raw_secret,
+)
+
+from whispr.utils.crypto import generate_rand_secret
 
 CONFIG_FILE = "whispr.yaml"
+MIN_GENERATION_LENGTH = 16
 
 
 @click.group()
 def cli():
     """Whispr is a CLI tool to safely inject vault secrets into an application.
-    Run `whispr init vault` to create a configuration.
+    Run `whispr init <vault>` to create a configuration.
 
-    Availble values for vault: ["aws", "azure", "gcp"]
+    Availble values for <vault>: ["aws", "azure", "gcp"]
     """
     pass
 
@@ -79,51 +87,74 @@ def run(command):
 cli.add_command(init)
 cli.add_command(run)
 
-# Secret group
 
+# Secret group
 @click.group()
 def secret():
-    """ Whispr secret sub-group manages a secret lifecycle.
+    """`whispr secret` group manages a secret lifecycle.
 
-    Availble subcommands: [get, rotate]
+    Availble subcommands: [get, gen-random]
 
-    Example: whispr secret get --vault=aw --secret-name=my-secret --region=us-west-2
+    Examples:\n
+        1. whispr secret get --vault=aws --secret-name=my-secret --region=us-west-2 \n
+        2. whispr secret gen-random --length=10
+        3. whispr secret gen-random --exclude="*;>/\'"
     """
     pass
 
+
+# Add secret command group
 cli.add_command(secret)
 
+
 @click.command()
-@click.option("--secret-name", nargs=1, type=click.STRING)
-@click.option("--vault", nargs=1, type=click.STRING)
-@click.option("--region", nargs=1, type=click.STRING)
-def get(region, vault, secret_name):
+@click.option("-s", "--secret-name", nargs=1, type=click.STRING)
+@click.option("-v", "--vault", nargs=1, type=click.STRING)
+@click.option("-r", "--region", nargs=1, type=click.STRING)  # AWS
+@click.option("-vu", "--vault-url", nargs=1, type=click.STRING)  # Azure
+def get(secret_name, vault, region, vault_url):
     """Fetches a vault secret and prints to standard output in JSON format"""
-    if not vault:
-        logger.error(
-            f"No vault type is provided to secret get command. Use vault=aws/azure/gcp as vaules."
-        )
-        return
-
-    if not secret_name:
-        logger.error(
-            f"No secret name is provided to secret get command. Use secret_name=<name> option."
-        )
-        return
-
-    config = {
-        "secret_name": secret_name,
-        "vault": vault,
-        "region": region
-    }
-    # Fetch secret based on the vault type
-    vault_secrets = fetch_secrets(config)
+    vault_secrets = get_raw_secret(
+        secret_name,
+        vault,
+        region=region,
+        vault_url=vault_url,
+    )
     if not vault_secrets:
         return
 
     print(json.dumps(vault_secrets, indent=4))
 
+
+@click.command()
+@click.option(
+    "--length",
+    nargs=1,
+    type=click.INT,
+    help=f"Length of generated secret. Default is {MIN_GENERATION_LENGTH}",
+)
+@click.option(
+    "--exclude",
+    nargs=1,
+    type=click.STRING,
+    help="Characters to exclude from secret. Use Escape (\\) to escape special characters",
+)
+def gen_random(length, exclude):
+    """Generates a cryptographically secure random secret of a given length, excluding specified characters"""
+
+    exclude_chars = exclude
+    if not exclude_chars:
+        exclude_chars = ""
+
+    if not length:
+        length = MIN_GENERATION_LENGTH
+
+    secret = generate_rand_secret(length=length, exclude_chars=exclude_chars)
+    print(secret)
+
+
 secret.add_command(get)
+secret.add_command(gen_random)
 
 if __name__ == "__main__":
     cli()
