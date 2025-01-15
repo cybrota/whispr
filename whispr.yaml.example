@@ -10,7 +10,7 @@
 # vault: azure
 # vault_url: https://my-creds.vault.azure.net/
 
-# GCP
+## GCP
 # env_file: .env
 # secret_name: my-secret
 # vault: gcp
