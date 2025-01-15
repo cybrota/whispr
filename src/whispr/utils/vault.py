@@ -73,7 +73,7 @@ def prepare_vault_config(vault_type: str) -> dict:
 
 
 def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
-    """Get raw secret from vault"""
+    """Get raw secret from the vault"""
 
     if not vault:
         logger.error(
@@ -87,15 +87,16 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
         )
         return {}
 
+    # Parse kwargs
     region = kwargs.get("region")
     vault_url = kwargs.get("vault_url")
-
+    project_id = kwargs.get("project_id")
     config = {}
 
     if vault == VaultType.AWS.value:
         if not region:
             logger.error(
-                f"No region option provided to get-secret sub command for vault: {vault}. Use --region=<val> option."
+                "No region option provided to get-secret sub command for AWS Vault. Use --region=<val> option."
             )
             return {}
 
@@ -111,6 +112,18 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
             "secret_name": secret_name,
             "vault": vault,
             "vault_url": vault_url,
+        }
+    elif vault == VaultType.GCP.value:
+        if not project_id:
+            logger.error(
+                "No project ID option is provided to get-secret sub command for GCP Vault. Use --project-id=<val> option."
+            )
+            return {}
+
+        config = {
+            "secret_name": secret_name,
+            "vault": vault,
+            "project_id": project_id,
         }
 
     # Fetch secret based on the vault type

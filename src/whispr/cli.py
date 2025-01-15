@@ -121,11 +121,37 @@ cli.add_command(secret)
 
 
 @click.command()
-@click.option("-s", "--secret-name", nargs=1, type=click.STRING, help="Secret name to fetch from a vault")
-@click.option("-v", "--vault", nargs=1, type=click.STRING, help="Vault type. Available values: aws, azure, gcp")
-@click.option("-r", "--region", nargs=1, type=click.STRING, help="Region (AWS-only property)")  # AWS
-@click.option("-u", "--vault-url", nargs=1, type=click.STRING, help="Vault URL (Azure-only property)")  # Azure
-@click.option("-p", "--project-id", nargs=1, type=click.STRING, help="Project ID (GCP-only property)")  # GCP
+@click.option(
+    "-s",
+    "--secret-name",
+    nargs=1,
+    type=click.STRING,
+    help="Secret name to fetch from a vault",
+)
+@click.option(
+    "-v",
+    "--vault",
+    nargs=1,
+    type=click.STRING,
+    help="Vault type. Available values: aws, azure, gcp",
+)
+@click.option(
+    "-r", "--region", nargs=1, type=click.STRING, help="Region (AWS-only property)"
+)  # AWS
+@click.option(
+    "-u",
+    "--vault-url",
+    nargs=1,
+    type=click.STRING,
+    help="Vault URL (Azure-only property)",
+)  # Azure
+@click.option(
+    "-p",
+    "--project-id",
+    nargs=1,
+    type=click.STRING,
+    help="Project ID (GCP-only property)",
+)  # GCP
 def get(secret_name, vault, region, vault_url, project_id):
     """Fetches a vault secret and prints to standard output in JSON format. Output is parseable by `jq` tool. Used for quick audit of secret K:V pairs"""
     vault_secrets = get_raw_secret(
