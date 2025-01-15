@@ -70,3 +70,63 @@ def prepare_vault_config(vault_type: str) -> dict:
         config["vault"] = VaultType.AZURE.value
 
     return config
+
+
+def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
+    """Get raw secret from the vault"""
+
+    if not vault:
+        logger.error(
+            "No vault type is provided to get-secret sub command. Use --vault=aws/azure/gcp as value."
+        )
+        return {}
+
+    if not secret_name:
+        logger.error(
+            "No secret name is provided to get-secret sub command. Use --secret_name=<val> option."
+        )
+        return {}
+
+    # Parse kwargs
+    region = kwargs.get("region")
+    vault_url = kwargs.get("vault_url")
+    project_id = kwargs.get("project_id")
+    config = {}
+
+    if vault == VaultType.AWS.value:
+        if not region:
+            logger.error(
+                "No region option provided to get-secret sub command for AWS Vault. Use --region=<val> option."
+            )
+            return {}
+
+        config = {"secret_name": secret_name, "vault": vault, "region": region}
+    elif vault == VaultType.AZURE.value:
+        if not vault_url:
+            logger.error(
+                "No Azure vault URL option is provided to get-secret sub command.  Use --vault-url=<val> option."
+            )
+            return {}
+
+        config = {
+            "secret_name": secret_name,
+            "vault": vault,
+            "vault_url": vault_url,
+        }
+    elif vault == VaultType.GCP.value:
+        if not project_id:
+            logger.error(
+                "No project ID option is provided to get-secret sub command for GCP Vault. Use --project-id=<val> option."
+            )
+            return {}
+
+        config = {
+            "secret_name": secret_name,
+            "vault": vault,
+            "project_id": project_id,
+        }
+
+    # Fetch secret based on the vault type
+    vault_secrets = fetch_secrets(config)
+
+    return vault_secrets

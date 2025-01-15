@@ -11,7 +11,14 @@ Step 2: Initialize a whispr configuration file for GCP.
 ```bash
 whispr init gcp
 ```
-This creates a file called `whispr.yaml`. Update the details.
+This creates a file called `whispr.yaml`. Update with the below details.
+
+```yaml
+env_file: .env
+secret_name: my-secret
+vault: gcp
+project_id: project-12345 # Required for GCP
+```
 
 Step 3: Define a `.env` file with secrets stored in GCP (Assuming secrets with below names exist in remote secret as key value pair)
 ```bash

@@ -27,7 +27,7 @@ def setup_structlog() -> structlog.BoundLogger:
     )
 
     # Set up basic configuration for the standard library logging
-    logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO)
+    logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.ERROR)
 
     # Return the structlog logger instance
     return structlog.get_logger()

@@ -1,0 +1,17 @@
+## AWS
+# env_file: .env
+# secret_name: my-secret
+# vault: aws
+# region: us-west-2
+
+## Azure
+# env_file: .env
+# secret_name: my-secret
+# vault: azure
+# vault_url: https://my-creds.vault.azure.net/
+
+## GCP
+# env_file: .env
+# secret_name: my-secret
+# vault: gcp
+# project_id: project-12345
