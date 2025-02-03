@@ -221,7 +221,9 @@ class GetRawSecretTestCase(unittest.TestCase):
         """Test that an empty dict is returned and an error is logged when no secret name is provided."""
         mock_fetch_secrets.return_value = {"some_key": "some_value"}
 
-        result = get_raw_secret(secret_name="", vault=VaultType.AWS.value, region=self.aws_region)
+        result = get_raw_secret(
+            secret_name="", vault=VaultType.AWS.value, region=self.aws_region
+        )
 
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once()
@@ -273,16 +275,18 @@ class GetRawSecretTestCase(unittest.TestCase):
         result = get_raw_secret(
             secret_name=self.secret_name,
             vault=VaultType.AWS.value,
-            region=self.aws_region
+            region=self.aws_region,
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": VaultType.AWS.value,
-            "region": self.aws_region
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {
+                "secret_name": self.secret_name,
+                "vault": VaultType.AWS.value,
+                "region": self.aws_region,
+            }
+        )
 
     @patch("whispr.utils.vault.logger", new_callable=MagicMock)
     @patch("whispr.utils.vault.fetch_secrets")
@@ -294,16 +298,18 @@ class GetRawSecretTestCase(unittest.TestCase):
         result = get_raw_secret(
             secret_name=self.secret_name,
             vault=VaultType.AZURE.value,
-            vault_url=self.azure_vault_url
+            vault_url=self.azure_vault_url,
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": VaultType.AZURE.value,
-            "vault_url": self.azure_vault_url
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {
+                "secret_name": self.secret_name,
+                "vault": VaultType.AZURE.value,
+                "vault_url": self.azure_vault_url,
+            }
+        )
 
     @patch("whispr.utils.vault.logger", new_callable=MagicMock)
     @patch("whispr.utils.vault.fetch_secrets")
@@ -315,13 +321,15 @@ class GetRawSecretTestCase(unittest.TestCase):
         result = get_raw_secret(
             secret_name=self.secret_name,
             vault=VaultType.GCP.value,
-            project_id=self.gcp_project_id
+            project_id=self.gcp_project_id,
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": VaultType.GCP.value,
-            "project_id": self.gcp_project_id
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {
+                "secret_name": self.secret_name,
+                "vault": VaultType.GCP.value,
+                "project_id": self.gcp_project_id,
+            }
+        )
