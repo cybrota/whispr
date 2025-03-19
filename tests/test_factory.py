@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import botocore.exceptions
 
-from whispr.aws import AWSVault
+from whispr.aws import AWSSSMVault, AWSVault
 from whispr.azure import AzureVault
 from whispr.gcp import GCPVault
 
@@ -53,6 +53,32 @@ class FactoryTestCase(unittest.TestCase):
             "secret_name": "dummy_secret",
             "logger": self.mock_logger,
             "region": "us-east-2",
+        }
+        vault_instance = VaultFactory.get_vault(**config)
+        self.assertIsInstance(vault_instance, AWSVault)
+
+    def test_get_aws_vault_simple_ssm_client(self):
+        """Test AWSVault client without SSO for ssm parameter store"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+            "region": "us-east-2",
+            "type": "parameter-store"
+        }
+        vault_instance = VaultFactory.get_vault(**config)
+        self.assertIsInstance(vault_instance, AWSSSMVault)
+
+    def test_get_aws_vault_simple_secrets_mgr_client(self):
+        """Test AWSVault client without SSO for secrets mgr"""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+            "region": "us-east-2",
+            "type": "secrets-manager"
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, AWSVault)

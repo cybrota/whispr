@@ -9,11 +9,11 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from google.cloud import secretmanager
 
-from whispr.aws import AWSVault
+from whispr.aws import AWSVault, AWSSSMVault
 from whispr.azure import AzureVault
 from whispr.gcp import GCPVault
 from whispr.vault import SimpleVault
-from whispr.enums import VaultType
+from whispr.enums import VaultType, AWSVaultSubType
 
 
 class VaultFactory:
@@ -46,6 +46,25 @@ class VaultFactory:
         return region
 
     @staticmethod
+    def _get_aws_client(region: str, sub_type: str) -> boto3.client:
+        """Builds a AWS client based on sub type"""
+        if sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+            return boto3.client("secretsmanager", region_name=region)
+        elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+            return boto3.client("ssm", region_name=region)
+
+    @staticmethod
+    def _get_aws_sso_client(
+        region: str, sso_profile_name: str, sub_type: str
+    ) -> boto3.client:
+        """Builds a AWS client based on sub type and SSO profile"""
+        session = boto3.Session(profile_name=sso_profile_name)
+        if sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+            return session.client("secretsmanager", region_name=region)
+        elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+            return session.client("ssm", region_name=region)
+
+    @staticmethod
     def get_vault(**kwargs) -> SimpleVault:
         """
         Factory method to return the appropriate secrets manager client based on the vault type.
@@ -59,25 +78,41 @@ class VaultFactory:
             ValueError: If sufficient information is not avaiable to initialize vault instance.
         """
         vault_type = kwargs.get("vault")
-        sso_profile = kwargs.get("sso_profile")
         logger: structlog.BoundLogger = kwargs.get("logger")
-        logger.info("Initializing vault", vault_type=vault_type)
+        logger.debug("Initializing vault", vault_type=vault_type)
 
         if vault_type == VaultType.AWS.value:
-            region = VaultFactory._get_aws_region(kwargs)
-            client = boto3.client("secretsmanager", region_name=region)
+            vault_sub_type: str | None = None
 
-            # When SSO profile is supplied use the session client
+            if kwargs.get("type"):
+                vault_sub_type = kwargs.get("type")
+            else:
+                # Fall back to secrets manager if type is not available
+                vault_sub_type = AWSVaultSubType.SECRETS_MANAGER.value
+
+            region = VaultFactory._get_aws_region(kwargs)
+            client = VaultFactory._get_aws_client(
+                region=region, sub_type=vault_sub_type
+            )
+
+            sso_profile = kwargs.get("sso_profile")
+            # When SSO profile is supplied, use the session client
             if sso_profile:
                 try:
-                    session = boto3.Session(profile_name=sso_profile)
-                    client = session.client("secretsmanager", region_name=region)
+                    client = VaultFactory._get_aws_sso_client(
+                        region=region,
+                        sso_profile_name=sso_profile,
+                        sub_type=vault_sub_type,
+                    )
                 except botocore.exceptions.ProfileNotFound:
                     raise ValueError(
                         f"The config profile {sso_profile} could not be found for vault: `{vault_type}`. Please check your AWS SSO config file and retry."
                     )
 
-            return AWSVault(logger, client)
+            if vault_sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+                return AWSVault(logger, client)
+            else:
+                return AWSSSMVault(logger, client)
 
         elif vault_type == VaultType.AZURE.value:
             vault_url = kwargs.get("vault_url")
