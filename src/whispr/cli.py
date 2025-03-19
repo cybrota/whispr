@@ -37,10 +37,18 @@ def cli():
 
 @click.command()
 @click.argument("vault", nargs=1, type=click.STRING)
-def init(vault):
-    """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc."""
-    config = prepare_vault_config(vault)
+@click.argument("service_type", default="", nargs=1, type=click.STRING, required=False)
+def init(vault, service_type):
+    """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc.
+    For AWS vault service type, you can chose `secrets-manager` or `parameter-store` based on secret location.
+
+    Ex: whispr init aws parameter-store
+    """
+    config = prepare_vault_config(vault, service_type)
     write_to_yaml_file(config, CONFIG_FILE)
+    logger.info(
+        "config file created at: %s",
+    )
 
 
 @click.command()

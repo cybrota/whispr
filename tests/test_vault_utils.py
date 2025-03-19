@@ -15,7 +15,7 @@ class SecretUtilsTestCase(unittest.TestCase):
     def setUp(self):
         """Set up test configuration and mock logger."""
         self.config = {
-            "vault": VaultType.AWS.value,
+            "vault": "aws",
             "secret_name": "test_secret",
         }
         self.vault_secrets = {"API_KEY": "123456"}
@@ -34,14 +34,25 @@ class SecretUtilsTestCase(unittest.TestCase):
         self.assertEqual(result, self.vault_secrets)
 
     @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
-    def test_fetch_secrets_missing_config(self, mock_logger):
+    def test_fetch_secrets_missing_vault_in_config(self, mock_logger):
         """Test fetch_secrets logs an error if the vault type or secret name is missing."""
-        config = {"vault": None, "secret_name": None}
+        config = {"vault": None}
 
         result = fetch_secrets(config)
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once_with(
-            "Vault type or secret name not specified in the configuration file."
+            "Vault is not specified in the configuration file. Set `vault` key."
+        )
+
+    @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
+    def test_fetch_secrets_missing_secret_name_in_config(self, mock_logger):
+        """Test fetch_secrets logs an error if the vault type or secret name is missing."""
+        config = {"vault": "aws", "secret_name": None}
+
+        result = fetch_secrets(config)
+        self.assertEqual(result, {})
+        mock_logger.error.assert_called_once_with(
+            "Secret name is not specified in the configuration file. Set `secret_name` key."
         )
 
     @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
@@ -89,62 +100,54 @@ class SecretUtilsTestCase(unittest.TestCase):
 
     def test_prepare_vault_config_aws(self):
         """Test prepare_vault_config generates AWS configuration."""
-        config = prepare_vault_config(VaultType.AWS.value)
+        config = prepare_vault_config("aws")
         expected_config = {
             "env_file": ".env",
             "secret_name": "<your_secret_name>",
-            "vault": VaultType.AWS.value,
+            "vault": "aws",
         }
         self.assertEqual(config, expected_config)
 
     def test_prepare_vault_config_aws_secrets_manager(self):
         """Test prepare_vault_config generates AWS configuration for secrets manager storage type."""
-        config = prepare_vault_config(VaultType.AWS.value, vault_sub_type="secrets-manager")
+        config = prepare_vault_config("aws", vault_sub_type="secrets-manager")
         expected_config = {
             "env_file": ".env",
             "secret_name": "<your_secret_name>",
-            "vault": {
-                VaultType.AWS.value: {
-                    "type": "secrets-manager",
-                    "region": "<your_aws_default_region>"
-                }
-            },
+            "vault": "aws",
+            "type": "secrets-manager",
         }
         self.assertEqual(config, expected_config)
 
     def test_prepare_vault_config_aws_parameter_store(self):
         """Test prepare_vault_config generates AWS configuration for parameter store storage type."""
-        config = prepare_vault_config(VaultType.AWS.value, vault_sub_type="parameter-store")
+        config = prepare_vault_config("aws", vault_sub_type="parameter-store")
         expected_config = {
             "env_file": ".env",
             "secret_name": "<your_secret_name>",
-            "vault": {
-                VaultType.AWS.value: {
-                    "type": "parameter-store",
-                    "region": "<your_aws_default_region>"
-                }
-            }
+            "vault": "aws",
+            "type": "parameter-store",
         }
         self.assertEqual(config, expected_config)
 
     def test_prepare_vault_config_gcp(self):
         """Test prepare_vault_config generates GCP configuration."""
-        config = prepare_vault_config(VaultType.GCP.value)
+        config = prepare_vault_config("gcp")
         expected_config = {
             "env_file": ".env",
             "secret_name": "<your_secret_name>",
-            "vault": VaultType.GCP.value,
+            "vault": "gcp",
             "project_id": "<gcp_project_id>",
         }
         self.assertEqual(config, expected_config)
 
     def test_prepare_vault_config_azure(self):
         """Test prepare_vault_config generates Azure configuration."""
-        config = prepare_vault_config(VaultType.AZURE.value)
+        config = prepare_vault_config("azure")
         expected_config = {
             "env_file": ".env",
             "secret_name": "<your_secret_name>",
-            "vault": VaultType.AZURE.value,
+            "vault": "azure",
             "vault_url": "<azure_vault_url>",
         }
         self.assertEqual(config, expected_config)
@@ -251,7 +254,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         """Test that an empty dict is returned and an error is logged when no secret name is provided."""
         mock_fetch_secrets.return_value = {"some_key": "some_value"}
 
-        result = get_raw_secret(secret_name="", vault=VaultType.AWS.value, region=self.aws_region)
+        result = get_raw_secret(secret_name="", vault="aws", region=self.aws_region)
 
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once()
@@ -263,7 +266,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         """Test that an empty dict is returned and an error is logged for AWS if region is missing."""
         mock_fetch_secrets.return_value = {"aws_key": "aws_value"}
 
-        result = get_raw_secret(self.secret_name, VaultType.AWS.value)
+        result = get_raw_secret(self.secret_name, "aws")
 
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once()
@@ -275,7 +278,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         """Test that an empty dict is returned and an error is logged for Azure if vault_url is missing."""
         mock_fetch_secrets.return_value = {"azure_key": "azure_value"}
 
-        result = get_raw_secret(self.secret_name, VaultType.AZURE.value)
+        result = get_raw_secret(self.secret_name, "azure")
 
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once()
@@ -287,7 +290,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         """Test that an empty dict is returned and an error is logged for GCP if project_id is missing."""
         mock_fetch_secrets.return_value = {"gcp_key": "gcp_value"}
 
-        result = get_raw_secret(self.secret_name, VaultType.GCP.value)
+        result = get_raw_secret(self.secret_name, "gcp")
 
         self.assertEqual(result, {})
         mock_logger.error.assert_called_once()
@@ -302,7 +305,7 @@ class GetRawSecretTestCase(unittest.TestCase):
 
         result = get_raw_secret(
             secret_name=self.secret_name,
-            vault=VaultType.AWS.value,
+            vault="aws",
             region=self.aws_region
         )
 
@@ -310,7 +313,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_logger.error.assert_not_called()
         mock_fetch_secrets.assert_called_once_with({
             "secret_name": self.secret_name,
-            "vault": VaultType.AWS.value,
+            "vault": "aws",
             "region": self.aws_region
         })
 
@@ -323,7 +326,7 @@ class GetRawSecretTestCase(unittest.TestCase):
 
         result = get_raw_secret(
             secret_name=self.secret_name,
-            vault=VaultType.AZURE.value,
+            vault="azure",
             vault_url=self.azure_vault_url
         )
 
@@ -331,7 +334,7 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_logger.error.assert_not_called()
         mock_fetch_secrets.assert_called_once_with({
             "secret_name": self.secret_name,
-            "vault": VaultType.AZURE.value,
+            "vault": "azure",
             "vault_url": self.azure_vault_url
         })
 
@@ -344,7 +347,7 @@ class GetRawSecretTestCase(unittest.TestCase):
 
         result = get_raw_secret(
             secret_name=self.secret_name,
-            vault=VaultType.GCP.value,
+            vault="gcp",
             project_id=self.gcp_project_id
         )
 
@@ -352,6 +355,6 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_logger.error.assert_not_called()
         mock_fetch_secrets.assert_called_once_with({
             "secret_name": self.secret_name,
-            "vault": VaultType.GCP.value,
+            "vault": "gcp",
             "project_id": self.gcp_project_id
         })

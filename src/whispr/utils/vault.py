@@ -15,9 +15,15 @@ def fetch_secrets(config: dict) -> dict:
     vault = config.get("vault")
     secret_name = config.get("secret_name")
 
-    if not vault or not secret_name:
+    if not vault:
         logger.error(
-            "Vault type or secret name not specified in the configuration file."
+            "Vault is not specified in the configuration file. Set `vault` key."
+        )
+        return {}
+
+    if not secret_name:
+        logger.error(
+            "Secret name is not specified in the configuration file. Set `secret_name` key."
         )
         return {}
 
@@ -52,12 +58,9 @@ def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
     return filled_secrets
 
 
-def prepare_vault_config(vault_type: str, vault_sub_type: str="") -> dict:
+def prepare_vault_config(vault_type: str, vault_sub_type: str = "") -> dict:
     """Prepares in-memory configuration for a given vault"""
-    config = {
-        "secret_name": "<your_secret_name>",
-        "env_file": ".env"
-    }
+    config = {"secret_name": "<your_secret_name>", "env_file": ".env"}
 
     # Add more configuration fields as needed for other secret managers.
     if vault_type == VaultType.GCP.value:
@@ -67,22 +70,11 @@ def prepare_vault_config(vault_type: str, vault_sub_type: str="") -> dict:
         config["vault_url"] = "<azure_vault_url>"
         config["vault"] = VaultType.AZURE.value
     elif vault_type == VaultType.AWS.value:
+        config["vault"] = VaultType.AWS.value
         if vault_sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
-            config["vault"] = {
-                VaultType.AWS.value: {
-                    "type": AWSVaultSubType.SECRETS_MANAGER.value, # specific vault sub-type
-                    "region": "<your_aws_default_region>"
-                }
-            }
+            config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
         elif vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
-            config["vault"] = {
-                VaultType.AWS.value: {
-                    "type": AWSVaultSubType.PARAMETER_STORE.value, # specific vault sub-type
-                    "region": "<your_aws_default_region>"
-                }
-            }
-        else:
-            config["vault"] = VaultType.AWS.value # Backwards-compatible top-level vault
+            config["type"] = AWSVaultSubType.PARAMETER_STORE.value
 
     return config
 

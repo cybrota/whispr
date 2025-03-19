@@ -10,6 +10,7 @@ class VaultType(Enum):
     GCP = "gcp"
     AZURE = "azure"
 
+
 class AWSVaultSubType(Enum):
     """Container for AWS vault sub-types"""
 
