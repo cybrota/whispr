@@ -97,6 +97,36 @@ class SecretUtilsTestCase(unittest.TestCase):
         }
         self.assertEqual(config, expected_config)
 
+    def test_prepare_vault_config_aws_secrets_manager(self):
+        """Test prepare_vault_config generates AWS configuration for secrets manager storage type."""
+        config = prepare_vault_config(VaultType.AWS.value, vault_sub_type="secrets-manager")
+        expected_config = {
+            "env_file": ".env",
+            "secret_name": "<your_secret_name>",
+            "vault": {
+                VaultType.AWS.value: {
+                    "type": "secrets-manager",
+                    "region": "<your_aws_default_region>"
+                }
+            },
+        }
+        self.assertEqual(config, expected_config)
+
+    def test_prepare_vault_config_aws_parameter_store(self):
+        """Test prepare_vault_config generates AWS configuration for parameter store storage type."""
+        config = prepare_vault_config(VaultType.AWS.value, vault_sub_type="parameter-store")
+        expected_config = {
+            "env_file": ".env",
+            "secret_name": "<your_secret_name>",
+            "vault": {
+                VaultType.AWS.value: {
+                    "type": "parameter-store",
+                    "region": "<your_aws_default_region>"
+                }
+            }
+        }
+        self.assertEqual(config, expected_config)
+
     def test_prepare_vault_config_gcp(self):
         """Test prepare_vault_config generates GCP configuration."""
         config = prepare_vault_config(VaultType.GCP.value)

@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 
 from whispr.factory import VaultFactory
 from whispr.logging import logger
-from whispr.enums import VaultType
+from whispr.enums import VaultType, AWSVaultSubType
 
 
 def fetch_secrets(config: dict) -> dict:
@@ -49,16 +49,14 @@ def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
                 f"The given key: '{key}' is not found in vault. So ignoring it."
             )
 
-    # Return the dictionary of matched secrets for further use if needed
     return filled_secrets
 
 
-def prepare_vault_config(vault_type: str) -> dict:
+def prepare_vault_config(vault_type: str, vault_sub_type: str="") -> dict:
     """Prepares in-memory configuration for a given vault"""
     config = {
-        "env_file": ".env",
         "secret_name": "<your_secret_name>",
-        "vault": VaultType.AWS.value,
+        "env_file": ".env"
     }
 
     # Add more configuration fields as needed for other secret managers.
@@ -68,6 +66,23 @@ def prepare_vault_config(vault_type: str) -> dict:
     elif vault_type == VaultType.AZURE.value:
         config["vault_url"] = "<azure_vault_url>"
         config["vault"] = VaultType.AZURE.value
+    elif vault_type == VaultType.AWS.value:
+        if vault_sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+            config["vault"] = {
+                VaultType.AWS.value: {
+                    "type": AWSVaultSubType.SECRETS_MANAGER.value, # specific vault sub-type
+                    "region": "<your_aws_default_region>"
+                }
+            }
+        elif vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+            config["vault"] = {
+                VaultType.AWS.value: {
+                    "type": AWSVaultSubType.PARAMETER_STORE.value, # specific vault sub-type
+                    "region": "<your_aws_default_region>"
+                }
+            }
+        else:
+            config["vault"] = VaultType.AWS.value # Backwards-compatible top-level vault
 
     return config
 
