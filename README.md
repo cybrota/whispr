@@ -29,7 +29,7 @@ Supported Vault Technologies:
 
 1. AWS Secrets Manager
 2. AWS SSM Parameter Store
-3. Microsoft Azure Vault
+3. Microsoft Azure Key Vault
 4. Google Cloud Secret Manager
 
 ![Supported-vaults](https://github.com/narenaryan/whispr/raw/main/whispr-supported.png)
