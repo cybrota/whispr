@@ -107,7 +107,7 @@ class AWSSSMVaultTestCase(unittest.TestCase):
         """Test fetch_secrets handles ResourceNotFoundException gracefully."""
         # Set up the client to raise ResourceNotFoundException
         self.mock_client.get_parameter.side_effect = botocore.exceptions.ClientError(
-            {"Error": {"Code": "ResourceNotFoundException"}}, "get_parameter"
+            {"Error": {"Code": "ParameterNotFound"}}, "get_parameter"
         )
 
         self.mock_client.meta.region_name = "us-east-1"
@@ -115,7 +115,7 @@ class AWSSSMVaultTestCase(unittest.TestCase):
         result = self.vault.fetch_secrets("non_existent_secret")
         self.assertEqual(result, "")
         self.mock_logger.error.assert_called_with(
-            "The secret is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?",
+            "The secret is not found on AWS Parameter store. Did you set the right AWS_DEFAULT_REGION ?",
             secret_name="non_existent_secret",
             region="us-east-1",
         )

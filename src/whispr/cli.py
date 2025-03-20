@@ -147,6 +147,13 @@ cli.add_command(secret)
     "-r", "--region", nargs=1, type=click.STRING, help="Region (AWS-only property)"
 )  # AWS
 @click.option(
+    "-t",
+    "--sub-type",
+    nargs=1,
+    type=click.STRING,
+    help="Sub vault type: [secrets-manager, parameter-store], default: secrets-manager (AWS-only property)",
+)  # AWS
+@click.option(
     "-u",
     "--vault-url",
     nargs=1,
@@ -160,12 +167,13 @@ cli.add_command(secret)
     type=click.STRING,
     help="Project ID (GCP-only property)",
 )  # GCP
-def get(secret_name, vault, region, vault_url, project_id):
+def get(secret_name, vault, region, sub_type, vault_url, project_id):
     """Fetches a vault secret and prints to standard output in JSON format. Output is parseable by `jq` tool. Used for quick audit of secret K:V pairs"""
     vault_secrets = get_raw_secret(
         secret_name,
         vault,
         region=region,
+        sub_type=sub_type,
         vault_url=vault_url,
         project_id=project_id,
     )

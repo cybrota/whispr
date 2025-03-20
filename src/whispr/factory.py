@@ -20,7 +20,7 @@ class VaultFactory:
     """A factory class to create client objects"""
 
     @staticmethod
-    def _get_aws_region(kwargs: dict) -> str:
+    def get_aws_region(kwargs: dict) -> str:
         """
         Retrieves the AWS region from the provided kwargs or environment variable.
 
@@ -90,7 +90,7 @@ class VaultFactory:
                 # Fall back to secrets manager if type is not available
                 vault_sub_type = AWSVaultSubType.SECRETS_MANAGER.value
 
-            region = VaultFactory._get_aws_region(kwargs)
+            region = VaultFactory.get_aws_region(kwargs)
             client = VaultFactory._get_aws_client(
                 region=region, sub_type=vault_sub_type
             )

@@ -78,9 +78,9 @@ class AWSSSMVault(SimpleVault):
             else:
                 return ""
         except botocore.exceptions.ClientError as error:
-            if error.response["Error"]["Code"] == "ResourceNotFoundException":
+            if error.response["Error"]["Code"] == "ParameterNotFound":
                 self.logger.error(
-                    "The secret is not found on AWS. Did you set the right AWS_DEFAULT_REGION ?",
+                    "The secret is not found on AWS Parameter store. Did you set the right AWS_DEFAULT_REGION ?",
                     secret_name=secret_name,
                     region=self.client.meta.region_name,
                 )

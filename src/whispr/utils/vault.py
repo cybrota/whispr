@@ -95,19 +95,33 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
         return {}
 
     # Parse kwargs
-    region = kwargs.get("region")
     vault_url = kwargs.get("vault_url")
     project_id = kwargs.get("project_id")
     config = {}
 
     if vault == VaultType.AWS.value:
-        if not region:
+        sub_type = kwargs.get("sub_type")
+        try:
+            # Try to get region from environment or passed region
+            region = VaultFactory.get_aws_region({"region": kwargs.get("region")})
+        except ValueError:
             logger.error(
                 "No region option provided to get-secret sub command for AWS Vault. Use --region=<val> option."
             )
             return {}
-
         config = {"secret_name": secret_name, "vault": vault, "region": region}
+
+        if sub_type:
+            if sub_type == None or sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+                config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
+            elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+                config["type"] = AWSVaultSubType.PARAMETER_STORE.value
+            else:
+                logger.error(
+                    f"Incorrect sub type: {sub_type} is passed with secret get command. Accepted values: [secrets-manager, parameter-store]"
+                )
+                return {}
+
     elif vault == VaultType.AZURE.value:
         if not vault_url:
             logger.error(
