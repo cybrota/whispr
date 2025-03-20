@@ -16,7 +16,12 @@ export AWS_DEFAULT_REGION=<region>
 Step 2: Initialize a whispr configuration file for AWS.
 
 ```bash
-whispr init aws
+whispr init aws secrets-manager
+```
+or
+
+```bash
+whispr init aws parameter-store # If your secret is stored in AWS SSM parameter store
 ```
 
 This creates a file called `whispr.yaml`. Update the below details.
@@ -25,23 +30,27 @@ This creates a file called `whispr.yaml`. Update the below details.
 env_file: .env
 secret_name: my-secret
 vault: aws
+type: secrets-manager # Another supported type is `parameter-store`
 region: us-west-2 # Required for AWS
-sso_profile: my_profile # Set in case using a SSO profile for authentication
+sso_profile: my_profile # Set in case if you are using a SSO profile for authentication (Enterprise developers)
 ```
 
-Step 3: Define a `.env` file with secrets stored in AWS (Assuming secrets with below names exist in remote secret as key value pair)
+Step 3: Define a `.env` file with secrets stored in AWS (Assuming a secret called `my-secret` with below names exist as a key value pair in AWS secrets manager)
 ```bash
 DB_USERNAME=
 DB_PASSWORD=
 ```
 
 Step 4: Inject secrets into your app by running:
+
+Let's say you want to provide vault secrets to a Node.js script named `script.js`:
+
 ```bash
 whispr run 'node script.js'
 ```
 
-DB_USERNAME & DB_PASSWORD are now available in Node.js program environment.
-
+DB_USERNAME & DB_PASSWORD are now available in script.js - `process.env`. This is very handy for development web servers.
 
 ## References:
 * https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sso/login.html
+* https://nodejs.org/en/learn/command-line/how-to-read-environment-variables-from-nodejs
