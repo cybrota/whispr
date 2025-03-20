@@ -37,10 +37,18 @@ def cli():
 
 @click.command()
 @click.argument("vault", nargs=1, type=click.STRING)
-def init(vault):
-    """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc."""
-    config = prepare_vault_config(vault)
+@click.argument("service_type", default="", nargs=1, type=click.STRING, required=False)
+def init(vault, service_type):
+    """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc.
+    For AWS vault service type, you can chose `secrets-manager` or `parameter-store` based on secret location.
+
+    Ex: whispr init aws parameter-store
+    """
+    config = prepare_vault_config(vault, service_type)
     write_to_yaml_file(config, CONFIG_FILE)
+    logger.info(
+        "config file created at: %s",
+    )
 
 
 @click.command()
@@ -139,6 +147,13 @@ cli.add_command(secret)
     "-r", "--region", nargs=1, type=click.STRING, help="Region (AWS-only property)"
 )  # AWS
 @click.option(
+    "-t",
+    "--sub-type",
+    nargs=1,
+    type=click.STRING,
+    help="Sub vault type: [secrets-manager, parameter-store], default: secrets-manager (AWS-only property)",
+)  # AWS
+@click.option(
     "-u",
     "--vault-url",
     nargs=1,
@@ -152,12 +167,13 @@ cli.add_command(secret)
     type=click.STRING,
     help="Project ID (GCP-only property)",
 )  # GCP
-def get(secret_name, vault, region, vault_url, project_id):
+def get(secret_name, vault, region, sub_type, vault_url, project_id):
     """Fetches a vault secret and prints to standard output in JSON format. Output is parseable by `jq` tool. Used for quick audit of secret K:V pairs"""
     vault_secrets = get_raw_secret(
         secret_name,
         vault,
         region=region,
+        sub_type=sub_type,
         vault_url=vault_url,
         project_id=project_id,
     )

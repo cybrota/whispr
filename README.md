@@ -27,6 +27,11 @@ Key Features of Whispr:
 
 Supported Vault Technologies:
 
+1. AWS Secrets Manager
+2. AWS SSM Parameter Store
+3. Microsoft Azure Key Vault
+4. Google Cloud Secret Manager
+
 ![Supported-vaults](https://github.com/narenaryan/whispr/raw/main/whispr-supported.png)
 
 
@@ -36,28 +41,16 @@ The MITRE ATT&CK Framework Tactic 8 (Credential Access) suggests that adversarie
 sensitive information in unencrypted files. To help developers, Whispr can safely fetch and inject secrets from a vault into the app environment or pass them as standard input just in time. This enables developers to securely manage
 credentials and mitigate advisory exploitation tactics.
 
-Whispr can also comes with handy utilities like:
-
-1. Audit a secret from vault
-
-```sh
-whispr secret get --vault=aws --secret-name=my_secret --region=us-east-1
-```
-
-2. Generate a crypto-safe random sequences for rotated secrets
-
-```sh
-whispr secret gen-random --length=16 --exclude='*/^'
-```
+In simple terms, you can store your secrets in AWS Secrets Manager/Parameter Store, create an empty `.env` file with keys mapped to cloud vault secret, then inject those mapped secrets into your program's environment.
 
 # Getting Started
 
 ## Installing Whispr
 
-To get started with Whispr, simply run:
+To get started with latest version of Whispr, simply run:
 
 ```bash
-pip install whispr
+pip install -U whispr
 ```
 
 ## Configuring Your Project
@@ -73,16 +66,30 @@ The available vault types are: `aws`, `azure`, and `gcp`.
 env_file: '.env'
 secret_name: <your_secret>
 vault: aws
+type: secrets-manager
 ```
-This default configuration will inject fetched secrets into `os.environ` of main process. If your app instead want to receive secrets as STDIN arguments, use `no_env: true` field.
+This default configuration will inject fetched secrets into `os.environ` of main process.
+
+For AWS SSM parameter store, the same config looks like this:
+```yaml
+env_file: '.env'
+secret_name: <your_secret>
+vault: aws
+type: parameter-store
+```
+
+If your app instead want to receive secrets as STDIN arguments, use `no_env: true` field.
 This is a secure way than default control but app now should parse arguments itself.
 
 ```yaml
 env_file: '.env'
 secret_name: <your_secret>
 vault: aws
+type: parameter-store
 no_env: true # Setting true will send KEY1=VAL1 secret pairs as command args
 ```
+
+See [whispr.yaml.example](https://github.com/narenaryan/whispr/raw/main/whispr.yaml.example) for configuration related to other supported vault types.
 
 ## Setting Up Your Injectable Secrets
 
@@ -116,9 +123,25 @@ whispr run '/bin/sh ./script.sh' # Inject secrets and run a custom bash script. 
 whispr run 'semgrep scan --pro' # Inject Semgrep App Token and scan current directory with Semgrep SAST tool.
 ```
 
+Whispr comes with handy utilities like:
+
+1. Audit a secret from vault
+
+```sh
+# Also equivalent to whispr secret get --vault=aws --secret=my_secret --region=us-east-1
+whispr secret get -v aws -s my_secret -r us-east-1
+```
+
+2. Generate a crypto-safe random sequences for rotated secrets
+
+```sh
+# Also equivalent to whispr secret gen-random --length=16 --exclude='*/^'
+whispr secret gen-random -l 16 -e '*/^'
+```
+
 ## Programmatic access of Whispr (Doesn't require a configuration file)
 
-Instead of using Whispr as an execution tool, a Python program can leverage core utility functions like this:
+Instead of using Whispr as an execution tool, a Python program can programmatically inject secrets from a vault and launch a sub-process:
 
 ```bash
 pip install whispr
@@ -130,17 +153,27 @@ Then from Python code you can import important functions like this:
 from whispr.utils.vault import fetch_secrets
 from whispr.utils.process import execute_command
 
+# Assuming there is a AWS parameter store secret with name: my/secret with JSON-like string with values:
+# '{"MY_DB_PASSWORD": "random_string"}'
+
 config = {
   "vault": "aws",
-  "secret_name": "<your_secret_name>",
+  "secret_name": "my/secret",
+  "type": "parameter-store"
   "region": "us-west-2"
 }
 
 secrets = fetch_secrets(config)
 
-# Now, inject secrets into your command's environment
-command = "ls -l"
-cp = execute_command(command.split(), no_env=False, secrets=secrets) #cp is CompletedProcess object.
+# Create a subprocess of a shell command/app with secrets.
+command = "printenv"
+# Environment list will have MY_DB_PASSWORD=random_string
+cp = execute_command(command.split(), no_env=False, secrets=secrets) # cp is CompletedProcess object.
+
+command = "sh script.sh"
+# script.sh will have access to env var MY_DB_PASSWORD
+# The injected secrets are cleaned from environment after script execution
+cp = execute_command(command.split(), no_env=False, secrets=secrets) # cp is CompletedProcess object.
 ```
 
 That's it. This is a programmatic equivalent to the tool usage which allows programs to fetch secrets from vault at run time.
@@ -149,8 +182,9 @@ That's it. This is a programmatic equivalent to the tool usage which allows prog
 
 Support:
 
+* Bitwarden Vault
 * HashiCorp Vault
 * 1Password Vault
 * K8s secret patching
 * Container patching (docker)
-* Increase test coverage
+* Increased test coverage

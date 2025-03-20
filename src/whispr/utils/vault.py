@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 
 from whispr.factory import VaultFactory
 from whispr.logging import logger
-from whispr.enums import VaultType
+from whispr.enums import VaultType, AWSVaultSubType
 
 
 def fetch_secrets(config: dict) -> dict:
@@ -15,9 +15,15 @@ def fetch_secrets(config: dict) -> dict:
     vault = config.get("vault")
     secret_name = config.get("secret_name")
 
-    if not vault or not secret_name:
+    if not vault:
         logger.error(
-            "Vault type or secret name not specified in the configuration file."
+            "Vault is not specified in the configuration file. Set `vault` key."
+        )
+        return {}
+
+    if not secret_name:
+        logger.error(
+            "Secret name is not specified in the configuration file. Set `secret_name` key."
         )
         return {}
 
@@ -49,17 +55,12 @@ def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
                 f"The given key: '{key}' is not found in vault. So ignoring it."
             )
 
-    # Return the dictionary of matched secrets for further use if needed
     return filled_secrets
 
 
-def prepare_vault_config(vault_type: str) -> dict:
+def prepare_vault_config(vault_type: str, vault_sub_type: str = "") -> dict:
     """Prepares in-memory configuration for a given vault"""
-    config = {
-        "env_file": ".env",
-        "secret_name": "<your_secret_name>",
-        "vault": VaultType.AWS.value,
-    }
+    config = {"secret_name": "<your_secret_name>", "env_file": ".env"}
 
     # Add more configuration fields as needed for other secret managers.
     if vault_type == VaultType.GCP.value:
@@ -68,6 +69,12 @@ def prepare_vault_config(vault_type: str) -> dict:
     elif vault_type == VaultType.AZURE.value:
         config["vault_url"] = "<azure_vault_url>"
         config["vault"] = VaultType.AZURE.value
+    elif vault_type == VaultType.AWS.value:
+        config["vault"] = VaultType.AWS.value
+        if vault_sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+            config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
+        elif vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+            config["type"] = AWSVaultSubType.PARAMETER_STORE.value
 
     return config
 
@@ -88,19 +95,33 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
         return {}
 
     # Parse kwargs
-    region = kwargs.get("region")
     vault_url = kwargs.get("vault_url")
     project_id = kwargs.get("project_id")
     config = {}
 
     if vault == VaultType.AWS.value:
-        if not region:
+        sub_type = kwargs.get("sub_type")
+        try:
+            # Try to get region from environment or passed region
+            region = VaultFactory.get_aws_region({"region": kwargs.get("region")})
+        except ValueError:
             logger.error(
                 "No region option provided to get-secret sub command for AWS Vault. Use --region=<val> option."
             )
             return {}
-
         config = {"secret_name": secret_name, "vault": vault, "region": region}
+
+        if sub_type:
+            if sub_type == None or sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+                config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
+            elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
+                config["type"] = AWSVaultSubType.PARAMETER_STORE.value
+            else:
+                logger.error(
+                    f"Incorrect sub type: {sub_type} is passed with secret get command. Accepted values: [secrets-manager, parameter-store]"
+                )
+                return {}
+
     elif vault == VaultType.AZURE.value:
         if not vault_url:
             logger.error(
