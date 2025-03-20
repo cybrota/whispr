@@ -97,9 +97,7 @@ class AWSSSMVaultTestCase(unittest.TestCase):
     def test_fetch_secrets_success(self):
         """Test successful fetch of secrets from AWS Secrets Manager."""
         self.mock_client.get_parameter.return_value = {
-            "Parameter": {
-                "Value": '{"key": "value"}'
-            }
+            "Parameter": {"Value": '{"key": "value"}'}
         }
         result = self.vault.fetch_secrets("test_secret")
         self.assertEqual(result, '{"key": "value"}')

@@ -65,7 +65,7 @@ class FactoryTestCase(unittest.TestCase):
             "secret_name": "dummy_secret",
             "logger": self.mock_logger,
             "region": "us-east-2",
-            "type": "parameter-store"
+            "type": "parameter-store",
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, AWSSSMVault)
@@ -78,7 +78,7 @@ class FactoryTestCase(unittest.TestCase):
             "secret_name": "dummy_secret",
             "logger": self.mock_logger,
             "region": "us-east-2",
-            "type": "secrets-manager"
+            "type": "secrets-manager",
         }
         vault_instance = VaultFactory.get_vault(**config)
         self.assertIsInstance(vault_instance, AWSVault)

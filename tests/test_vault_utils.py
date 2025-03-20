@@ -304,18 +304,14 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_fetch_secrets.return_value = expected_response
 
         result = get_raw_secret(
-            secret_name=self.secret_name,
-            vault="aws",
-            region=self.aws_region
+            secret_name=self.secret_name, vault="aws", region=self.aws_region
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": "aws",
-            "region": self.aws_region
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {"secret_name": self.secret_name, "vault": "aws", "region": self.aws_region}
+        )
 
     @patch("whispr.utils.vault.logger", new_callable=MagicMock)
     @patch("whispr.utils.vault.fetch_secrets")
@@ -325,18 +321,18 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_fetch_secrets.return_value = expected_response
 
         result = get_raw_secret(
-            secret_name=self.secret_name,
-            vault="azure",
-            vault_url=self.azure_vault_url
+            secret_name=self.secret_name, vault="azure", vault_url=self.azure_vault_url
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": "azure",
-            "vault_url": self.azure_vault_url
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {
+                "secret_name": self.secret_name,
+                "vault": "azure",
+                "vault_url": self.azure_vault_url,
+            }
+        )
 
     @patch("whispr.utils.vault.logger", new_callable=MagicMock)
     @patch("whispr.utils.vault.fetch_secrets")
@@ -346,15 +342,15 @@ class GetRawSecretTestCase(unittest.TestCase):
         mock_fetch_secrets.return_value = expected_response
 
         result = get_raw_secret(
-            secret_name=self.secret_name,
-            vault="gcp",
-            project_id=self.gcp_project_id
+            secret_name=self.secret_name, vault="gcp", project_id=self.gcp_project_id
         )
 
         self.assertEqual(result, expected_response)
         mock_logger.error.assert_not_called()
-        mock_fetch_secrets.assert_called_once_with({
-            "secret_name": self.secret_name,
-            "vault": "gcp",
-            "project_id": self.gcp_project_id
-        })
+        mock_fetch_secrets.assert_called_once_with(
+            {
+                "secret_name": self.secret_name,
+                "vault": "gcp",
+                "project_id": self.gcp_project_id,
+            }
+        )
