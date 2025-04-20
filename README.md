@@ -1,11 +1,22 @@
+# Whispr
 [![Downloads](https://static.pepy.tech/badge/whispr/month)](https://pepy.tech/project/whispr)
 [![Coverage Status](https://coveralls.io/repos/github/narenaryan/whispr/badge.svg)](https://coveralls.io/github/narenaryan/whispr)
 
-# Whispr
+<picture width="500">
+  <source
+    width="100%"
+    media="(prefers-color-scheme: dark)"
+    src="https://github.com/cybrota/whispr/blob/main/logo.png"
+    alt="Scarfer logo (dark)"
+  />
+  <img
+    width="100%"
+    src="https://github.com/cybrota/whispr/blob/main/logo.png"
+    alt="Sharfer logo (light)"
+  />
+</picture>
 
-![Logo](https://github.com/narenaryan/whispr/raw/main/logo.png)
-
-Whispr (Pronounced as whisper) is a CLI tool to safely inject secrets from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.) into your app's environment. This is very useful for enabling secure local software development.
+Safely inject secrets into your app's environment from your favorite secret vault (Ex: AWS Secrets Manager, Azure Key Vault etc.).
 
 Whispr uses keys (with empty values) specified in a `.env` file and fetches respective secrets from a vault, and sets them as environment variables before launching an application.
 
