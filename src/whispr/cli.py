@@ -30,7 +30,7 @@ def cli():
     """Whispr is a CLI tool to safely inject vault secrets into an application.
     Run `whispr init <vault>` to create a configuration.
 
-    Availble values for <vault>: ["aws", "azure", "gcp"]
+    Available values for <vault>: ["aws", "azure", "gcp"]
     """
     pass
 
