@@ -1,6 +1,6 @@
 ## Whispr Usage Guide for Vault Type: Azure
 
-Step 1: Authenticate to GCP using az command:
+Step 1: Authenticate to Azure using az command:
 
 ```bash
 az login
