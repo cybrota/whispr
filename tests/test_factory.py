@@ -8,6 +8,7 @@ import botocore.exceptions
 from whispr.aws import AWSSSMVault, AWSVault
 from whispr.azure import AzureVault
 from whispr.gcp import GCPVault
+from whispr.bitwarden import BitwardenVault
 
 from whispr.factory import VaultFactory
 
@@ -219,5 +220,30 @@ class FactoryTestCase(unittest.TestCase):
             "logger": self.mock_logger,
         }
 
+        with self.assertRaises(ValueError):
+            VaultFactory.get_vault(**config)
+
+    def test_get_bitwarden_vault_client(self):
+        """Test BitwardenVault client"""
+        config = {
+            "vault": "bitwarden",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "access_token": "token",
+            "logger": self.mock_logger,
+        }
+        with patch("whispr.factory.BitwardenClient") as mock_client:
+            vault_instance = VaultFactory.get_vault(**config)
+            self.assertIsInstance(vault_instance, BitwardenVault)
+            mock_client.assert_called()
+
+    def test_get_bitwarden_vault_client_no_token(self):
+        """Test BitwardenVault raises exception when access_token not provided"""
+        config = {
+            "vault": "bitwarden",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+        }
         with self.assertRaises(ValueError):
             VaultFactory.get_vault(**config)

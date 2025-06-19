@@ -75,6 +75,10 @@ def prepare_vault_config(vault_type: str, vault_sub_type: str = "") -> dict:
             config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
         elif vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
             config["type"] = AWSVaultSubType.PARAMETER_STORE.value
+    elif vault_type == VaultType.BITWARDEN.value:
+        config["vault"] = VaultType.BITWARDEN.value
+        config["access_token"] = "<bitwarden_access_token>"
+        config["state_file"] = "<bitwarden_state_file>"
 
     return config
 
@@ -145,6 +149,20 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
             "secret_name": secret_name,
             "vault": vault,
             "project_id": project_id,
+        }
+    elif vault == VaultType.BITWARDEN.value:
+        access_token = kwargs.get("access_token")
+        if not access_token:
+            logger.error(
+                "No access token option is provided to get-secret sub command for Bitwarden Vault. Use --access-token=<val> option."
+            )
+            return {}
+        state_file = kwargs.get("state_file")
+        config = {
+            "secret_name": secret_name,
+            "vault": vault,
+            "access_token": access_token,
+            "state_file": state_file,
         }
 
     # Fetch secret based on the vault type
