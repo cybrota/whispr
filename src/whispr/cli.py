@@ -30,7 +30,7 @@ def cli():
     """Whispr is a CLI tool to safely inject vault secrets into an application.
     Run `whispr init <vault>` to create a configuration.
 
-    Available values for <vault>: ["aws", "azure", "gcp"]
+    Available values for <vault>: ["aws", "azure", "gcp", "bitwarden"]
     """
     pass
 
@@ -141,7 +141,7 @@ cli.add_command(secret)
     "--vault",
     nargs=1,
     type=click.STRING,
-    help="Vault type. Available values: aws, azure, gcp",
+    help="Vault type. Available values: aws, azure, gcp, bitwarden",
 )
 @click.option(
     "-r", "--region", nargs=1, type=click.STRING, help="Region (AWS-only property)"
