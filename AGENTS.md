@@ -11,13 +11,13 @@ This repository follows these guidelines for contributions by AI agents or human
 
 2. **Simplicity First**: Prefer simpler implementations over overly complex solutions.
 
-3. **Run Tests**: Always run tests before committing to ensure functionality and catch regressions. Use `go test ./...` for Go modules.
+3. **Run Tests**: Always run tests before committing to ensure functionality and catch regressions. Use `pytest --cov=whispr tests` for Python tests.
 
 4. **Uniform Structure**: Maintain a consistent code structure across modules so files and packages are easy to navigate.
 
 5. **Explain Why**: Add comments explaining *why* something is done if it is not obvious from code alone.
 
-6. **Copyright Header**: Add the following header at the beginning of every new `.go` code file created as part of PR:
+6. **Copyright Header**: Add the following header at the beginning of every new `.py` code file created as part of PR:
 
 ```
 Copyright (c) 2025 Naren Yellavula & Cybrota contributors
@@ -30,6 +30,6 @@ you may not use this file except in compliance with the License.
 
 8. **Architectural Decision Records (ADRs)**: For non-trivial design choices, add a short ADR (docs/adr/NNN-*.md) explaining context, the decision, and alternatives.
 
-9. **Style & Formatting**: Use opinionated formatters/lints (e.g. gofmt + goimports, golangci-lint) and run them.
+9. **Style & Formatting**: Use ruff linter to style the code.
 
-10. **Security**: Run go vet, govulncheck to make sure code is free from basic security issues.
+10. **Security**: Run `bandit` to check if code is free from security issues
