@@ -42,6 +42,7 @@ Supported Vault Technologies:
 2. AWS SSM Parameter Store
 3. Microsoft Azure Key Vault
 4. Google Cloud Secret Manager
+5. Bitwarden Secrets Manager
 
 ![Supported-vaults](https://github.com/narenaryan/whispr/raw/main/whispr-supported.png)
 
@@ -193,7 +194,6 @@ That's it. This is a programmatic equivalent to the tool usage which allows prog
 
 Support:
 
-* Bitwarden Vault
 * HashiCorp Vault
 * 1Password Vault
 * K8s secret patching
