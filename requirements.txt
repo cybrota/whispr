@@ -5,5 +5,5 @@ PyYAML==6.0.2
 google-cloud-secret-manager==2.20.2
 structlog==24.4.0
 azure-keyvault==4.2.0
-azure-identity==1.19.0
+azure-identity==1.24.0
 hvac==2.3.0
