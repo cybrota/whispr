@@ -32,14 +32,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "click==8.1.7",
-    "python-dotenv==1.0.1",
-    "boto3==1.35.42",
+    "click==8.2.1",
+    "python-dotenv==1.1.1",
+    "boto3==1.40.9",
     "PyYAML==6.0.2",
-    "google-cloud-secret-manager==2.20.2",
+    "google-cloud-secret-manager==2.24.0",
     "structlog==24.4.0",
     "azure-keyvault==4.2.0",
-    "azure-identity==1.19.0",
+    "azure-identity==1.24.0",
     "hvac==2.3.0",
 ]
 [project.urls]
@@ -49,6 +49,13 @@ Source = "https://github.com/cybrota/whispr"
 
 [tool.hatch.version]
 path = "src/whispr/__about__.py"
+
+[project.optional-dependencies]
+dev = [
+    "coverage==7.10.3",
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
+]
 
 [tool.hatch.envs.default]
 dependencies = ["coverage[toml]>=6.5", "pytest"]
