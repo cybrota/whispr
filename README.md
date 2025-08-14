@@ -64,6 +64,24 @@ To get started with latest version of Whispr, simply run:
 pip install -U whispr
 ```
 
+### For Development Installation
+
+If you want to install from source or contribute to the project:
+
+```bash
+# Clone the repository
+git clone https://github.com/cybrota/whispr.git
+cd whispr
+
+# Install in development mode with all dependencies
+pip install -e .
+
+# Or install with test dependencies
+pip install -e ".[dev]"
+```
+
+All dependencies are managed through `pyproject.toml`.
+
 ## Configuring Your Project
 
 **Step 1: Initialize Whispr**
