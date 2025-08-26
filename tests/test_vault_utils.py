@@ -152,6 +152,18 @@ class SecretUtilsTestCase(unittest.TestCase):
         }
         self.assertEqual(config, expected_config)
 
+    def test_prepare_vault_config_bitwarden(self):
+        """Test prepare_vault_config generates Bitwarden configuration."""
+        config = prepare_vault_config("bitwarden")
+        expected_config = {
+            "env_file": ".env",
+            "secret_name": "<your_secret_name>",
+            "vault": "bitwarden",
+            "access_token": "<bitwarden_access_token>",
+            "state_file": "<bitwarden_state_file>",
+        }
+        self.assertEqual(config, expected_config)
+
 
 class CryptoUtilitiesTestCase(unittest.TestCase):
     """Unit tests for the crypto utilities: generate_rand_secret"""

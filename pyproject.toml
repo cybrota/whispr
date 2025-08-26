@@ -41,6 +41,7 @@ dependencies = [
     "azure-keyvault==4.2.0",
     "azure-identity==1.19.0",
     "hvac==2.3.0",
+    "bitwarden-sdk==1.0.0",
 ]
 [project.urls]
 Documentation = "https://github.com/cybrota/whispr/blob/main/README.md"
