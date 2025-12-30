@@ -24,17 +24,29 @@ def _default_log_path() -> str:
 
 def _resolve_log_path() -> str:
     log_path = _default_log_path()
-    log_dir = Path(log_path).parent
-    try:
-        log_dir.mkdir(parents=True, exist_ok=True)
+    if _ensure_writable_log_path(log_path):
         return log_path
+
+    if platform.system() == "Darwin":
+        fallback_dir = Path.home() / "Library" / "Logs" / "whispr"
+    else:
+        fallback_dir = Path.home() / ".local" / "state" / "whispr"
+    fallback_path = str(fallback_dir / "access.log")
+    if _ensure_writable_log_path(fallback_path):
+        return fallback_path
+
+    return str(Path.cwd() / "whispr_access.log")
+
+
+def _ensure_writable_log_path(log_path: str) -> bool:
+    log_file = Path(log_path)
+    try:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        with log_file.open("a", encoding="utf-8"):
+            pass
+        return True
     except OSError:
-        if platform.system() == "Darwin":
-            fallback_dir = Path.home() / "Library" / "Logs" / "whispr"
-        else:
-            fallback_dir = Path.home() / ".local" / "state" / "whispr"
-        fallback_dir.mkdir(parents=True, exist_ok=True)
-        return str(fallback_dir / "access.log")
+        return False
 
 
 def setup_structlog() -> structlog.BoundLogger:
