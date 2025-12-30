@@ -3,6 +3,7 @@
 import structlog
 from google.cloud import secretmanager
 import google.api_core
+from whispr.logging import log_secret_fetch
 from whispr.vault import SimpleVault
 
 
@@ -38,6 +39,8 @@ class GCPVault(SimpleVault):
             response = self.client.access_secret_version(name=secret_name)
             secret_data = response.payload.data.decode("UTF-8")
             self.logger.info(f"Successfully fetched gcp secret: {secret_name}")
+            if secret_data:
+                log_secret_fetch(self.logger, secret_name, "gcp")
             return secret_data
         except google.api_core.exceptions.NotFound:
             self.logger.error(

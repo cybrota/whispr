@@ -4,8 +4,8 @@ import boto3
 import botocore.exceptions
 import structlog
 
+from whispr.logging import log_secret_fetch
 from whispr.vault import SimpleVault
-from whispr.enums import AWSVaultSubType
 
 
 class AWSVault(SimpleVault):
@@ -29,8 +29,11 @@ class AWSVault(SimpleVault):
         """
         try:
             response = self.client.get_secret_value(SecretId=secret_name)
+            secret_value = response.get("SecretString") or ""
             self.logger.debug(f"Successfully fetched aws secret: {secret_name}")
-            return response.get("SecretString")
+            if secret_value:
+                log_secret_fetch(self.logger, secret_name, "aws")
+            return secret_value
         except botocore.exceptions.ClientError as error:
             if error.response["Error"]["Code"] == "ResourceNotFoundException":
                 self.logger.error(
@@ -74,9 +77,11 @@ class AWSSSMVault(SimpleVault):
             response = self.client.get_parameter(Name=secret_name)
             param = response.get("Parameter")
             if param:
-                return param.get("Value")
-            else:
-                return ""
+                secret_value = param.get("Value") or ""
+                if secret_value:
+                    log_secret_fetch(self.logger, secret_name, "aws-ssm")
+                return secret_value
+            return ""
         except botocore.exceptions.ClientError as error:
             if error.response["Error"]["Code"] == "ParameterNotFound":
                 self.logger.error(
