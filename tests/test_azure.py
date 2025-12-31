@@ -1,7 +1,7 @@
 """Tests for Azure module"""
 
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, ANY
 
 import structlog
 from azure.core.exceptions import ResourceNotFoundError
@@ -37,8 +37,12 @@ class AzureVaultTestCase(unittest.TestCase):
 
         result = self.vault.fetch_secrets("test_secret")
         self.assertEqual(result, '{"key": "value"}')
-        self.mock_logger.info.assert_called_with(
-            "Successfully fetched secret: test_secret"
+        self.mock_logger.info.assert_any_call("Successfully fetched secret: test_secret")
+        self.mock_logger.info.assert_any_call(
+            "Secret fetched",
+            secret_name="test_secret",
+            vault_type="azure",
+            fetched_at=ANY,
         )
         self.mock_client.get_secret.assert_called_with("test_secret")
 

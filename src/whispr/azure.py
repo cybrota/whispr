@@ -3,6 +3,7 @@
 import structlog
 from azure.keyvault.secrets import SecretClient
 import azure.core.exceptions
+from whispr.logging import log_secret_fetch
 from whispr.vault import SimpleVault
 
 
@@ -31,6 +32,8 @@ class AzureVault(SimpleVault):
         try:
             secret = self.client.get_secret(secret_name)
             self.logger.info(f"Successfully fetched secret: {secret_name}")
+            if secret.value:
+                log_secret_fetch(self.logger, secret_name, "azure")
             return secret.value
         except azure.core.exceptions.ResourceNotFoundError:
             self.logger.error(

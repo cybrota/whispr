@@ -1,7 +1,7 @@
 """Tests for GCP module"""
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, ANY
 
 import google.api_core.exceptions
 
@@ -35,8 +35,14 @@ class GCPVaultTestCase(unittest.TestCase):
 
         result = self.vault.fetch_secrets("test_secret")
         self.assertEqual(result, '{"key": "value"}')
-        self.mock_logger.info.assert_called_with(
+        self.mock_logger.info.assert_any_call(
             "Successfully fetched gcp secret: projects/test_project_id/secrets/test_secret/versions/latest"
+        )
+        self.mock_logger.info.assert_any_call(
+            "Secret fetched",
+            secret_name="projects/test_project_id/secrets/test_secret/versions/latest",
+            vault_type="gcp",
+            fetched_at=ANY,
         )
         self.mock_client.access_secret_version.assert_called_with(
             name="projects/test_project_id/secrets/test_secret/versions/latest"
