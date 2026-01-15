@@ -12,6 +12,8 @@ from google.cloud import secretmanager
 from whispr.aws import AWSVault, AWSSSMVault
 from whispr.azure import AzureVault
 from whispr.gcp import GCPVault
+from whispr.bitwarden import BitwardenVault
+from bitwarden_sdk import BitwardenClient, DeviceType, client_settings_from_dict
 from whispr.vault import SimpleVault
 from whispr.enums import VaultType, AWSVaultSubType
 
@@ -136,6 +138,20 @@ class VaultFactory:
             client = secretmanager.SecretManagerServiceClient()
 
             return GCPVault(logger, client, project_id)
+        elif vault_type == VaultType.BITWARDEN.value:
+            access_token = kwargs.get("access_token")
+            if not access_token:
+                raise ValueError(
+                    f"Access token is not supplied for vault: {vault_type}. "
+                    "Please set the 'access_token' key in whispr.yaml config file to continue."
+                )
+            state_file = kwargs.get("state_file")
+            api_url = kwargs.get("api_url", "https://api.bitwarden.com")
+            identity_url = kwargs.get("identity_url", "https://identity.bitwarden.com")
+            settings = client_settings_from_dict({"apiUrl": api_url, "deviceType": DeviceType.SDK, "identityUrl": identity_url, "userAgent": "Whispr"})
+            client = BitwardenClient(settings)
+            client.auth().login_access_token(access_token, state_file)
+            return BitwardenVault(logger, client)
         # TODO: Add HashiCorp Vault implementation
         else:
             raise ValueError(f"Unsupported vault type: {vault_type}")

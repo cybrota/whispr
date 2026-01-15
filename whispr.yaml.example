@@ -29,3 +29,10 @@
 # secret_name: my-secret
 # vault: gcp
 # project_id: project-12345
+
+## Bitwarden Secrets Manager Config
+# env_file: .env
+# secret_name: my-secret-id
+# vault: bitwarden
+# access_token: <bitwarden_access_token>
+# state_file: ~/.config/whispr_bw_state.json
