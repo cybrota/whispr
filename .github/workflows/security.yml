@@ -9,7 +9,7 @@ on:
       - "*"
 
 jobs:
-  semgrep-scan:
+  quality-and-security:
     runs-on: ubuntu-22.04
 
     steps:
@@ -21,10 +21,17 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Semgrep
+      - name: Install quality and security tools
         run: |
           python -m pip install --upgrade pip
-          pip install semgrep
+          pip install -r requirements_test.txt
+          pip install bandit semgrep ruff
+
+      - name: Run Ruff lint
+        run: ruff check src tests
+
+      - name: Run Bandit scan
+        run: bandit -q -r src
 
       - name: Run Semgrep scan
         run: semgrep scan
