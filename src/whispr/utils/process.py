@@ -1,5 +1,5 @@
 import os
-import subprocess
+import subprocess  # nosec B404
 import shlex
 
 from whispr.logging import logger
@@ -15,19 +15,26 @@ def execute_command(
         secrets = {}
 
     try:
-        usr_command = shlex.split(command[0])
+        if len(command) == 1:
+            usr_command = shlex.split(command[0])
+        else:
+            usr_command = list(command)
+
+        command_env = os.environ.copy()
 
         if no_env:
             # Pass as --env K=V format (secure)
             usr_command.extend([f"{k}={v}" for k, v in secrets.items()])
         else:
-            # Pass via environment (slightly insecure)
-            os.environ.update(secrets)
+            # Pass via subprocess environment only
+            command_env.update(secrets)
 
-        sp = subprocess.run(usr_command, env=os.environ, shell=False, check=True)
+        sp = subprocess.run(  # nosec B603
+            usr_command, env=command_env, shell=False, check=True
+        )
         return sp
     except subprocess.CalledProcessError as e:
         logger.error(
-            f"Encountered a problem while running command: '{command[0]}'. Aborting."
+            f"Encountered a problem while running command: '{' '.join(command)}'. Aborting."
         )
         raise e

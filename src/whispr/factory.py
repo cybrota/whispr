@@ -52,6 +52,9 @@ class VaultFactory:
             return boto3.client("secretsmanager", region_name=region)
         elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
             return boto3.client("ssm", region_name=region)
+        raise ValueError(
+            f"Unsupported AWS vault type: {sub_type}. Supported values: ['{AWSVaultSubType.SECRETS_MANAGER.value}', '{AWSVaultSubType.PARAMETER_STORE.value}']."
+        )
 
     @staticmethod
     def _get_aws_sso_client(
@@ -63,6 +66,9 @@ class VaultFactory:
             return session.client("secretsmanager", region_name=region)
         elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
             return session.client("ssm", region_name=region)
+        raise ValueError(
+            f"Unsupported AWS vault type: {sub_type}. Supported values: ['{AWSVaultSubType.SECRETS_MANAGER.value}', '{AWSVaultSubType.PARAMETER_STORE.value}']."
+        )
 
     @staticmethod
     def get_vault(**kwargs) -> SimpleVault:
@@ -111,8 +117,11 @@ class VaultFactory:
 
             if vault_sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
                 return AWSVault(logger, client)
-            else:
+            if vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
                 return AWSSSMVault(logger, client)
+            raise ValueError(
+                f"Unsupported AWS vault type: {vault_sub_type}. Supported values: ['{AWSVaultSubType.SECRETS_MANAGER.value}', '{AWSVaultSubType.PARAMETER_STORE.value}']."
+            )
 
         elif vault_type == VaultType.AZURE.value:
             vault_url = kwargs.get("vault_url")

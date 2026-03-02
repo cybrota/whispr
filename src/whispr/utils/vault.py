@@ -9,7 +9,7 @@ from whispr.enums import VaultType, AWSVaultSubType
 
 def fetch_secrets(config: dict) -> dict:
     """Fetch secret from relevant vault"""
-    kwargs = config
+    kwargs = dict(config)
     kwargs["logger"] = logger
 
     vault = config.get("vault")
@@ -37,7 +37,13 @@ def fetch_secrets(config: dict) -> dict:
     if not secret_string:
         return {}
 
-    return json.loads(secret_string)
+    try:
+        return json.loads(secret_string)
+    except json.JSONDecodeError:
+        logger.error(
+            "Fetched secret payload is not valid JSON. Ensure the secret value is a JSON object string."
+        )
+        return {}
 
 
 def get_filled_secrets(env_file: str, vault_secrets: dict) -> dict:
@@ -112,7 +118,7 @@ def get_raw_secret(secret_name: str, vault: str, **kwargs) -> dict:
         config = {"secret_name": secret_name, "vault": vault, "region": region}
 
         if sub_type:
-            if sub_type == None or sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
+            if sub_type == AWSVaultSubType.SECRETS_MANAGER.value:
                 config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
             elif sub_type == AWSVaultSubType.PARAMETER_STORE.value:
                 config["type"] = AWSVaultSubType.PARAMETER_STORE.value
