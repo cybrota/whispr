@@ -89,8 +89,8 @@ vault: aws
 type: parameter-store
 ```
 
-If your app instead want to receive secrets as STDIN arguments, use `no_env: true` field.
-This is a secure way than default control but app now should parse arguments itself.
+If your app should receive injected values as command arguments (instead of environment variables), use `no_env: true`.
+With this option, Whispr appends `KEY=VALUE` pairs to the executed command.
 
 ```yaml
 env_file: '.env'
@@ -139,7 +139,7 @@ Whispr comes with handy utilities like:
 1. Audit a secret from vault
 
 ```sh
-# Also equivalent to whispr secret get --vault=aws --secret=my_secret --region=us-east-1
+# Also equivalent to whispr secret get --vault=aws --secret-name=my_secret --region=us-east-1
 whispr secret get -v aws -s my_secret -r us-east-1
 ```
 
@@ -170,7 +170,7 @@ from whispr.utils.process import execute_command
 config = {
   "vault": "aws",
   "secret_name": "my/secret",
-  "type": "parameter-store"
+  "type": "parameter-store",
   "region": "us-west-2"
 }
 
@@ -183,8 +183,18 @@ cp = execute_command(command.split(), no_env=False, secrets=secrets) # cp is Com
 
 command = "sh script.sh"
 # script.sh will have access to env var MY_DB_PASSWORD
-# The injected secrets are cleaned from environment after script execution
+# The injected secrets are scoped to subprocess environment only
 cp = execute_command(command.split(), no_env=False, secrets=secrets) # cp is CompletedProcess object.
+```
+
+## Developer checks
+
+Run quality and test checks before opening a PR:
+
+```bash
+ruff check src tests
+bandit -q -r src
+pytest --cov=whispr tests
 ```
 
 That's it. This is a programmatic equivalent to the tool usage which allows programs to fetch secrets from vault at run time.
