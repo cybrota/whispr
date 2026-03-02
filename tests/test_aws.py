@@ -1,7 +1,7 @@
 """Tests for AWS module"""
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import botocore.exceptions
 
@@ -48,19 +48,18 @@ class AWSVaultTestCase(unittest.TestCase):
             region="us-east-1",
         )
 
-    @patch("whispr.aws.AWSVault.fetch_secrets")
-    def test_fetch_secrets_unrecognized_client_exception(self, mock_fetch_secrets):
+    def test_fetch_secrets_unrecognized_client_exception(self):
         """Test fetch_secrets handles UnrecognizedClientException gracefully."""
-        mock_fetch_secrets.side_effect = botocore.exceptions.ClientError(
+        self.mock_client.get_secret_value.side_effect = botocore.exceptions.ClientError(
             {"Error": {"Code": "UnrecognizedClientException"}}, "get_secret_value"
         )
 
-        with self.assertRaises(botocore.exceptions.ClientError):
-            result = self.vault.fetch_secrets("incorrect_credentials_secret")
-            self.assertEqual(result, "")
-            self.mock_logger.error.assert_called_with(
-                "Incorrect AWS credentials set for operation. Please verify them and retry."
-            )
+        result = self.vault.fetch_secrets("incorrect_credentials_secret")
+
+        self.assertEqual(result, "")
+        self.mock_logger.error.assert_called_with(
+            "Incorrect AWS credentials set for operation. Please verify them and retry."
+        )
 
     def test_fetch_secrets_generic_exception(self):
         """Test fetch_secrets raises exception and logs an error for generic exceptions."""
@@ -120,19 +119,18 @@ class AWSSSMVaultTestCase(unittest.TestCase):
             region="us-east-1",
         )
 
-    @patch("whispr.aws.AWSSSMVault.fetch_secrets")
-    def test_fetch_secrets_unrecognized_client_exception(self, mock_fetch_secrets):
+    def test_fetch_secrets_unrecognized_client_exception(self):
         """Test fetch_secrets handles UnrecognizedClientException gracefully."""
-        mock_fetch_secrets.side_effect = botocore.exceptions.ClientError(
+        self.mock_client.get_parameter.side_effect = botocore.exceptions.ClientError(
             {"Error": {"Code": "UnrecognizedClientException"}}, "get_parameter"
         )
 
-        with self.assertRaises(botocore.exceptions.ClientError):
-            result = self.vault.fetch_secrets("incorrect_credentials_secret")
-            self.assertEqual(result, "")
-            self.mock_logger.error.assert_called_with(
-                "Incorrect AWS credentials set for operation. Please verify them and retry."
-            )
+        result = self.vault.fetch_secrets("incorrect_credentials_secret")
+
+        self.assertEqual(result, "")
+        self.mock_logger.error.assert_called_with(
+            "Incorrect AWS credentials set for operation. Please verify them and retry."
+        )
 
     def test_fetch_secrets_generic_exception(self):
         """Test fetch_secrets raises exception and logs an error for generic exceptions."""

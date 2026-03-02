@@ -6,7 +6,6 @@ import json
 from whispr.utils.vault import fetch_secrets, get_filled_secrets, prepare_vault_config
 from whispr.utils.vault import get_raw_secret
 from whispr.utils.crypto import generate_rand_secret
-from whispr.enums import VaultType
 
 
 class SecretUtilsTestCase(unittest.TestCase):
@@ -32,6 +31,35 @@ class SecretUtilsTestCase(unittest.TestCase):
 
         result = fetch_secrets(self.config)
         self.assertEqual(result, self.vault_secrets)
+
+    @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
+    @patch("whispr.utils.vault.VaultFactory.get_vault")
+    def test_fetch_secrets_invalid_json_payload(self, mock_get_vault, mock_logger):
+        """Test fetch_secrets logs and returns empty dict for invalid JSON."""
+        config = {"vault": "aws", "secret_name": "test_secret"}
+        mock_vault_instance = MagicMock()
+        mock_vault_instance.fetch_secrets.return_value = "not-json"
+        mock_get_vault.return_value = mock_vault_instance
+
+        result = fetch_secrets(config)
+
+        self.assertEqual(result, {})
+        mock_logger.error.assert_called_once_with(
+            "Fetched secret payload is not valid JSON. Ensure the secret value is a JSON object string."
+        )
+
+    @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
+    @patch("whispr.utils.vault.VaultFactory.get_vault")
+    def test_fetch_secrets_does_not_mutate_input_config(self, mock_get_vault, mock_logger):
+        """Test fetch_secrets does not mutate caller-supplied config."""
+        config = {"vault": "aws", "secret_name": "test_secret"}
+        mock_vault_instance = MagicMock()
+        mock_vault_instance.fetch_secrets.return_value = json.dumps(self.vault_secrets)
+        mock_get_vault.return_value = mock_vault_instance
+
+        fetch_secrets(config)
+
+        self.assertNotIn("logger", config)
 
     @patch("whispr.utils.vault.logger", new_callable=lambda: MagicMock())
     def test_fetch_secrets_missing_vault_in_config(self, mock_logger):

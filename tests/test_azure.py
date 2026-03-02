@@ -1,12 +1,9 @@
 """Tests for Azure module"""
 
 import unittest
-from unittest.mock import Mock, MagicMock, ANY
-
-import structlog
+from unittest.mock import MagicMock, ANY
 from azure.core.exceptions import ResourceNotFoundError
 
-from whispr.vault import SimpleVault
 from whispr.azure import AzureVault
 
 

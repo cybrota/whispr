@@ -11,13 +11,23 @@ transparent with contributions, and following best practices for secure developm
 
 1. **Fork** the Whispr repository on GitHub.
 2. **Clone** your forked repository to your local machine using `git clone https://github.com/your-username/whispr.git`.
-3. **Create a new branch** (e.g., `feature/new-feature`) and commit your changes in that branch.
+3. **Create a new branch** using the `<type>/<short-topic>` pattern (e.g., `feat/add-s3-backup`) and commit your changes there.
 
 ## Contribution Guidelines
 
 * **Follow the MIT license**: All contributions must be MIT licensed.
 * **Code style**: We use [Semantic Versioning](https://semver.org/) for versioning and follow PEP 8 style guidelines for Python code.
 * **Documentation**: Please update the relevant documentation (e.g., README, CHANGELOG) to reflect changes in your contribution.
+
+## Local Quality Checks
+
+Before opening a pull request, run:
+
+```bash
+ruff check src tests
+bandit -q -r src
+pytest --cov=whispr tests
+```
 
 ## Submitting Contributions
 

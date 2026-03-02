@@ -22,7 +22,6 @@ authors = [{ name = "Naren Yellavula", email = "naren.yellavula@gmail.com" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -51,7 +50,7 @@ Source = "https://github.com/cybrota/whispr"
 path = "src/whispr/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = ["coverage[toml]>=6.5", "pytest"]
+dependencies = ["coverage[toml]>=6.5", "pytest", "hypothesis"]
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -86,3 +85,4 @@ venv = "whispr"
 [tool.pytest.ini_options]
 addopts = "--cov=whispr"
 pythonpath = ["src"]
+markers = ["fuzz: property-based fuzz tests"]

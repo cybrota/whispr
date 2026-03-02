@@ -2,6 +2,9 @@
 
 This repository follows these guidelines for contributions by AI agents or humans:
 
+
+## General
+
 1. **Commit Messages**: Use [Conventional Commits](https://www.conventionalcommits.org/) format. Examples include:
    - `feat:` for new features
    - `fix:` for bug fixes
@@ -33,3 +36,8 @@ you may not use this file except in compliance with the License.
 9. **Style & Formatting**: Use ruff linter to style the code.
 
 10. **Security**: Run `bandit` to check if code is free from security issues
+
+
+## Build
+
+* Use this conda env to run Pytests & other code-related operations: `/opt/homebrew/Caskroom/miniconda/base/envs/whispr/bin/python`

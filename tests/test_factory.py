@@ -124,7 +124,7 @@ class FactoryTestCase(unittest.TestCase):
             "region": "us-west-2",  # Explicit region
             "logger": self.mock_logger,
         }
-        print(VaultFactory.get_vault(**config).client)
+        VaultFactory.get_vault(**config)
         mock_boto_client.assert_called_with("secretsmanager", region_name="us-west-2")
 
     @patch("boto3.client")
@@ -171,6 +171,33 @@ class FactoryTestCase(unittest.TestCase):
         }
         VaultFactory.get_vault(**config)
         mock_boto_client.assert_called_with("secretsmanager", region_name="us-west-2")
+
+    @patch("boto3.client")
+    def test_get_aws_client_raises_on_invalid_sub_type(self, mock_boto_client):
+        """Test AWS client builder rejects unsupported sub type."""
+        with self.assertRaises(ValueError):
+            VaultFactory._get_aws_client("us-east-1", "invalid")
+        mock_boto_client.assert_not_called()
+
+    @patch("boto3.Session")
+    def test_get_aws_sso_client_raises_on_invalid_sub_type(self, mock_session):
+        """Test AWS SSO client builder rejects unsupported sub type."""
+        with self.assertRaises(ValueError):
+            VaultFactory._get_aws_sso_client("us-east-1", "dev", "invalid")
+        mock_session.assert_called_once_with(profile_name="dev")
+
+    def test_get_aws_vault_raises_on_invalid_sub_type(self):
+        """Test AWS vault factory rejects unsupported sub type."""
+        config = {
+            "vault": "aws",
+            "env": ".env",
+            "secret_name": "dummy_secret",
+            "logger": self.mock_logger,
+            "region": "us-east-1",
+            "type": "invalid",
+        }
+        with self.assertRaises(ValueError):
+            VaultFactory.get_vault(**config)
 
     def test_get_azure_vault_client(self):
         """Test AzureVault client"""
