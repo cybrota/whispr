@@ -9,6 +9,7 @@ class VaultType(Enum):
     AWS = "aws"
     GCP = "gcp"
     AZURE = "azure"
+    BITWARDEN = "bitwarden"
 
 
 class AWSVaultSubType(Enum):
