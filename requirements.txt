@@ -2,7 +2,7 @@ click==8.1.7
 python-dotenv==1.0.1
 boto3==1.35.42
 PyYAML==6.0.2
-google-cloud-secret-manager==2.20.2
+google-cloud-secret-manager==2.25.0
 structlog==24.4.0
 azure-keyvault==4.2.0
 azure-identity==1.19.0
