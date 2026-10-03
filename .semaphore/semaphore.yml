@@ -25,6 +25,10 @@ global_job_config:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements_test.txt
       - python -m pip install -e .
+  epilogue:
+    always:
+      commands:
+        - '[[ -f report.xml ]] && test-results publish report.xml'
 
 blocks:
   - name: "Tests"
@@ -33,7 +37,7 @@ blocks:
       jobs:
         - name: "pytest"
           commands:
-            - python -m pytest --cov=whispr tests
+            - python -m pytest --cov=whispr --junitxml=report.xml tests
 
   - name: "Code quality"
     dependencies: []
@@ -62,3 +66,10 @@ blocks:
           commands:
             - python -m pip install build
             - python -m build
+
+after_pipeline:
+  task:
+    jobs:
+      - name: "Merge test reports"
+        commands:
+          - test-results gen-pipeline-report
