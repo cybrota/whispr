@@ -1,5 +1,5 @@
 # Semaphore CI pipeline for whispr.
-# See: https://docs.semaphoreci.com/reference/pipeline-yaml-reference/
+# See: https://docs.semaphore.io/reference/pipeline-yaml
 
 version: v1.0
 name: "whispr CI"
