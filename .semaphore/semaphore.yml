@@ -1,141 +1,61 @@
-# This is a Semaphore configuration file for fan-in/fan-out workflow using Docker
-# For more information about Semaphore configuration visit:
-# https://docs.semaphoreci.com/reference/pipeline-yaml-reference/
+# Semaphore CI pipeline for whispr.
+# See: https://docs.semaphoreci.com/reference/pipeline-yaml-reference/
 
-version: v1.0  # Semaphore configuration version
-name: "🌟 Fan-In/Fan-Out Pipeline"  # Pipeline display name
+version: v1.0
+name: "whispr CI"
 
-# Define the machine type, OS image, and containers
 agent:
   machine:
-    type: a2-standard-4
-    os_image: macos-xcode16
+    type: e1-standard-2
+    os_image: ubuntu2204
 
-  containers:
-    - name: main
-      image: 'registry.semaphoreci.com/node:20'  # Node.js 20 container
-    - name: postgres
-      image: registry.semaphoreci.com/postgres:17  # PostgreSQL 17 for database operations
-    - name: redis
-      image: registry.semaphoreci.com/redis:7.0  # Redis 7.0 for caching
-
-# Configure when to stop the pipeline early
 fail_fast:
   stop:
-    when: branch != 'main'  # Stop all blocks if a job fails on non-main branches
+    when: "branch != 'main'"
+
 auto_cancel:
   running:
-    when: branch != 'main'  # Cancel running pipelines on non-main branches
-  queued:
-    when: branch = 'main'   # Cancel queued pipelines on main branch
+    when: "branch != 'main'"
+
+global_job_config:
+  prologue:
+    commands:
+      - checkout
+      - sem-version python 3.12
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements_test.txt
+      - python -m pip install -e .
 
 blocks:
-  # Initial setup block (fan-out starts here)
-  - name: "🛠️ Setup"
-    dependencies: []
+  - name: "Tests"
     task:
       jobs:
-        - name: "📦 Install Dependencies"
+        - name: "pytest"
           commands:
-            - echo "Checking out code..."
-            - echo "Installing project dependencies..."
-            - echo "Setup completed successfully!"
+            - python -m pytest --cov=whispr tests
 
-  # Parallel testing blocks (fan-out)
-  - name: "🧪 Unit Tests"
-    dependencies: ["🛠️ Setup"]
+  - name: "Code quality"
     task:
       jobs:
-        - name: "🟢 Run Unit Tests"
+        - name: "ruff"
           commands:
-            - echo "Running unit tests in container..."
-            - echo "Unit tests passed successfully!"
+            - python -m ruff check src tests
 
-  - name: "🔍 Integration Tests"
-    dependencies: ["🛠️ Setup"]
+  - name: "Security"
     task:
-      env_vars:
-        - name: DATABASE_URL
-          value: postgresql://postgres@postgres:5432/test_db
-        - name: REDIS_URL
-          value: redis://redis:6379
       jobs:
-        - name: "🔄 Run Integration Tests"
+        - name: "bandit"
           commands:
-            - echo "Setting up test database..."
-            - echo "Running integration tests with PostgreSQL..."
-            - echo "Running cache tests with Redis..."
-            - echo "Integration tests passed successfully!"
+            - python -m bandit -r src/whispr
 
-  - name: "🌐 E2E Tests"
-    dependencies: ["🛠️ Setup"]
+  - name: "Build"
+    dependencies:
+      - "Tests"
+      - "Code quality"
+      - "Security"
     task:
       jobs:
-        - name: "🎭 Run E2E Tests"
+        - name: "package"
           commands:
-            - echo "Starting containerized environment..."
-            - echo "Running end-to-end tests..."
-            - echo "E2E tests passed successfully!"
-
-  # Code quality checks (fan-out)
-  - name: "✨ Code Quality"
-    dependencies: ["🛠️ Setup"]
-    task:
-      jobs:
-        - name: "🔍 Lint"
-          commands:
-            - echo "Running code linting in container..."
-            - echo "Linting passed successfully!"
-        - name: "📊 Type Check"
-          commands:
-            - echo "Running type checks in container..."
-            - echo "Type checking passed successfully!"
-
-  # Security checks (fan-out)
-  - name: "🔐 Security"
-    dependencies: ["🛠️ Setup"]
-    task:
-      jobs:
-        - name: "🛡️ Security Scan"
-          commands:
-            - echo "Scanning container dependencies..."
-            - echo "Running container security checks..."
-            - echo "Security scan completed successfully!"
-
-  # Build block (fan-in)
-  - name: "📦 Build"
-    dependencies: ["🧪 Unit Tests", "🔍 Integration Tests", "🌐 E2E Tests", "✨ Code Quality", "🔐 Security"]
-    task:
-      jobs:
-        - name: "🔨 Build Production"
-          commands:
-            - echo "Building production Docker image..."
-            - echo "Running multi-stage build..."
-            - echo "Build completed successfully!"
-
-  # Docker build and push (fan-in)
-  - name: "🐳 Docker"
-    dependencies: ["📦 Build"]
-    task:
-      secrets:
-        - name: dockerhub-credentials
-      jobs:
-        - name: "📦 Build and Push"
-          commands:
-            - echo "Logging into Docker registry..."
-            - echo "Pushing production image..."
-            - echo "Docker image published successfully!"
-
-  # Deploy block (final fan-in)
-  - name: "🚀 Deploy"
-    dependencies: ["🐳 Docker"]
-    task:
-      secrets:
-        - name: aws-credentials
-      jobs:
-        - name: "🌍 Deploy to Production"
-          commands:
-            - echo "Configuring deployment credentials..."
-            - echo "Updating container service..."
-            - echo "Rolling out new containers..."
-            - echo "Deployment completed successfully!"
+            - python -m pip install build
+            - python -m build
