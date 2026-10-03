@@ -28,6 +28,7 @@ global_job_config:
 
 blocks:
   - name: "Tests"
+    dependencies: []
     task:
       jobs:
         - name: "pytest"
@@ -35,6 +36,7 @@ blocks:
             - python -m pytest --cov=whispr tests
 
   - name: "Code quality"
+    dependencies: []
     task:
       jobs:
         - name: "ruff"
@@ -42,6 +44,7 @@ blocks:
             - python -m ruff check src tests
 
   - name: "Security"
+    dependencies: []
     task:
       jobs:
         - name: "bandit"
