@@ -1,0 +1,64 @@
+# Semaphore CI pipeline for whispr.
+# See: https://docs.semaphore.io/reference/pipeline-yaml
+
+version: v1.0
+name: "whispr CI"
+
+agent:
+  machine:
+    type: f1-standard-2
+    os_image: ubuntu2204
+
+fail_fast:
+  stop:
+    when: "branch != 'main'"
+
+auto_cancel:
+  running:
+    when: "branch != 'main'"
+
+global_job_config:
+  prologue:
+    commands:
+      - checkout
+      - sem-version python 3.12
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements_test.txt
+      - python -m pip install -e .
+
+blocks:
+  - name: "Tests"
+    dependencies: []
+    task:
+      jobs:
+        - name: "pytest"
+          commands:
+            - python -m pytest --cov=whispr tests
+
+  - name: "Code quality"
+    dependencies: []
+    task:
+      jobs:
+        - name: "ruff"
+          commands:
+            - python -m ruff check src tests
+
+  - name: "Security"
+    dependencies: []
+    task:
+      jobs:
+        - name: "bandit"
+          commands:
+            - python -m bandit -r src/whispr
+
+  - name: "Build"
+    dependencies:
+      - "Tests"
+      - "Code quality"
+      - "Security"
+    task:
+      jobs:
+        - name: "package"
+          commands:
+            - python -m pip install build
+            - python -m build
