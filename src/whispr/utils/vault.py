@@ -81,6 +81,11 @@ def prepare_vault_config(vault_type: str, vault_sub_type: str = "") -> dict:
             config["type"] = AWSVaultSubType.SECRETS_MANAGER.value
         elif vault_sub_type == AWSVaultSubType.PARAMETER_STORE.value:
             config["type"] = AWSVaultSubType.PARAMETER_STORE.value
+    else:
+        raise ValueError(
+            f"Unsupported vault type: {vault_type!r}. "
+            "Available values: ['aws', 'azure', 'gcp']"
+        )
 
     return config
 

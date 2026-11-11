@@ -181,6 +181,15 @@ class SecretUtilsTestCase(unittest.TestCase):
         self.assertEqual(config, expected_config)
 
 
+class PrepareVaultConfigInvalidTestCase(unittest.TestCase):
+    """Unit tests for rejecting unsupported vault types."""
+
+    def test_prepare_vault_config_unknown_vault_raises(self):
+        """Test prepare_vault_config raises ValueError for an unknown vault."""
+        with self.assertRaises(ValueError):
+            prepare_vault_config("unsupported-vault")
+
+
 class CryptoUtilitiesTestCase(unittest.TestCase):
     """Unit tests for the crypto utilities: generate_rand_secret"""
 

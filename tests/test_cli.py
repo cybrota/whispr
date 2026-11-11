@@ -31,6 +31,12 @@ class CLITestCase(unittest.TestCase):
         mock_write.assert_called_once_with({"vault": "aws"}, cli_module.CONFIG_FILE)
         mock_logger.info.assert_called_once_with("config file created at: %s")
 
+    def test_init_rejects_unsupported_vault(self):
+        result = self.runner.invoke(cli_module.cli, ["init", "unsupported-vault"])
+
+        self.assertEqual(result.exit_code, 2)
+        self.assertIn("not one of 'aws', 'azure', 'gcp'", result.output)
+
     @patch("whispr.cli.logger")
     @patch("whispr.cli.os.path.exists", return_value=False)
     def test_run_errors_when_config_missing(self, _mock_exists, mock_logger):
