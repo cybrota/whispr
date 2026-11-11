@@ -20,6 +20,7 @@ from whispr.utils.vault import (
 )
 
 from whispr.utils.crypto import generate_rand_secret
+from whispr.enums import VaultType
 
 CONFIG_FILE = "whispr.yaml"
 MIN_GENERATION_LENGTH = 16
@@ -36,7 +37,13 @@ def cli():
 
 
 @click.command()
-@click.argument("vault", nargs=1, type=click.STRING)
+@click.argument(
+    "vault",
+    nargs=1,
+    type=click.Choice(
+        [VaultType.AWS.value, VaultType.AZURE.value, VaultType.GCP.value]
+    ),
+)
 @click.argument("service_type", default="", nargs=1, type=click.STRING, required=False)
 def init(vault, service_type):
     """Creates a whispr vault configuration file (YAML). This file defines vault properties like secret name and vault type etc.
